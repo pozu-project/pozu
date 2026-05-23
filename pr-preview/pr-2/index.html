@@ -439,7 +439,12 @@
         // Video loading via sleap-io.js
         // ============================================================
         async function loadVideoModel() {
-            const video = await loadVideo(VIDEO_URL);
+            // Force the Mp4Box backend: the EMBER S3 URL has no file
+            // extension, so sleap-io.js's auto-selection would fall
+            // back to the HTML5 `<video>` backend, which doesn't
+            // populate `shape` or `getFrameTimes()` and therefore
+            // can't tell us the total frame count.
+            const video = await loadVideo(VIDEO_URL, { backend: "mp4box" });
             // `getFrameTimes` materialises the per-frame timeline,
             // which lets us know totalFrames + fps reliably. Some
             // backends don't expose it, in which case we fall back to
@@ -492,9 +497,13 @@
         async function loadRandomFrame() {
             if (!state.videoModel) return;
             const total = await refreshTotalFrames();
+            // If the backend can't tell us a frame count, still try to
+            // show frame 0 — that's better than leaving the UI stuck
+            // on the loading overlay with all controls disabled.
             if (total < 2) {
-                showStatus("error",
-                    `Cannot pick a random frame — backend reports ${total} frame(s).`);
+                console.warn(
+                    `Backend reports ${total} frame(s); falling back to frame 0.`);
+                await showFrame(0);
                 return;
             }
             // Pick a fresh index; avoid showing the same frame twice
@@ -513,6 +522,7 @@
             const bitmap = await state.videoModel.getFrame(idx);
             if (bitmap == null) {
                 showStatus("error", `Backend returned no data for frame ${idx}.`);
+                initialLoading.style.display = "none";
                 setControlsEnabled(true);
                 return;
             }
