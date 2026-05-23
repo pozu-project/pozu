@@ -14,6 +14,7 @@ test.describe("Pose Zoo labeling page", () => {
         for (const id of ["#newFrameBtn", "#resetBtn", "#downloadBtn"]) {
             await expect(page.locator(id)).toBeVisible();
         }
+        await expect(page.locator("#downloadBtn")).toContainText("Download .slp");
     });
 
     test("renders one palette entry per label definition", async ({ page }) => {

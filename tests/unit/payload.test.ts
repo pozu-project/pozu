@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { buildPayload, pickRandomFrame } from "../../src/payload.ts";
+import { saveSlpToBytes } from "@talmolab/sleap-io.js";
+import { buildLabelsObject, buildPayload, pickRandomFrame } from "../../src/payload.ts";
+import { buildSkeleton } from "../../src/skeleton.ts";
 import { LABEL_DEFINITIONS } from "../../src/skeleton.ts";
 
 const VIDEO_URL = "https://example.com/video.mp4";
@@ -67,5 +69,21 @@ describe("pickRandomFrame", () => {
         const rng = () => seq[i++ % seq.length];
         const result = pickRandomFrame(100, 5, rng);
         expect(result).toBe(70);
+    });
+});
+
+describe("buildLabelsObject", () => {
+    it("produces Labels that can be exported to .slp bytes", async () => {
+        const labels = buildLabelsObject({
+            videoUrl: VIDEO_URL,
+            frameIndex: 12,
+            videoMeta: { fps: 30, totalFrames: 100, width: 640, height: 480 },
+            placed: new Map([["nose", { pixelX: 123, pixelY: 45 }]]),
+            skeleton: buildSkeleton(),
+        });
+
+        const bytes = await saveSlpToBytes(labels);
+        expect(bytes).toBeInstanceOf(Uint8Array);
+        expect(bytes.byteLength).toBeGreaterThan(0);
     });
 });
