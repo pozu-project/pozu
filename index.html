@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose Zoo — sleap-io.js Labeler</title>
+    <!--
+      Load the browser build of @talmolab/sleap-io.js (v2) from a CDN.
+      esm.sh resolves the package's "browser" entry and bundles its
+      transitive dependencies (mp4box, mediabunny, h5wasm, …) so it can
+      run as a plain ES module in any modern browser.
+    -->
+    <script type="importmap">
+    {
+      "imports": {
+        "@talmolab/sleap-io.js": "https://esm.sh/@talmolab/sleap-io.js@0.2.3?bundle-deps"
+      }
+    }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+        }
+
+        h1 {
+            margin: 20px 0 6px;
+            font-size: 1.5rem;
+            color: #e94560;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 14px;
+        }
+
+        .subtitle a { color: #f3c56c; }
+
+        .instructions {
+            font-size: 0.9rem;
+            color: #c7bbaa;
+            max-width: 720px;
+            text-align: center;
+            margin: 0 16px 14px;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .controls button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #newFrameBtn { background: #e94560; color: white; }
+        #submitBtn { background: #0f3460; color: white; border: 2px solid #e94560; }
+        #resetBtn  { background: #533483; color: white; }
+
+        .frame-info {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #aaa;
+            padding: 4px 12px;
+            background: #0a0a1a;
+            border-radius: 4px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .canvas-container {
+            position: relative;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            cursor: crosshair;
+            line-height: 0;
+        }
+
+        canvas { display: block; max-width: 100%; }
+
+        .label-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 6px rgba(0,0,0,0.6);
+            transform: translate(-50%, -50%);
+            cursor: move;
+            pointer-events: auto;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #16213e;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .sidebar h2, .sidebar h3 { color: #f3c56c; margin-bottom: 10px; font-size: 1rem; }
+
+        .label-palette { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+
+        .label-item {
+            display: grid;
+            grid-template-columns: 18px 1fr auto 16px;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            background: #0a0a1a;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: border-color 0.1s;
+        }
+
+        .label-item:hover { border-color: #533483; }
+        .label-item.active { border-color: #e94560; }
+
+        .color-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .label-item .coords {
+            font-family: monospace;
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        .label-item .status-icon { color: #555; }
+        .label-item.placed .status-icon { color: #44ff88; }
+
+        .output-section {
+            margin-top: 12px;
+            background: #0a0a1a;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        #jsonOutput {
+            font-family: ui-monospace, Menlo, monospace;
+            font-size: 11px;
+            color: #c7bbaa;
+            white-space: pre;
+            max-height: 220px;
+            overflow: auto;
+        }
+
+        #statusMsg {
+            margin-top: 10px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        #statusMsg.info    { display: block; background: #0f3460; color: #fff; }
+        #statusMsg.success { display: block; background: #1e4d2b; color: #b6f5c4; }
+        #statusMsg.error   { display: block; background: #5a1a1a; color: #ffb4b4; }
+
+        .config-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .config-row label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .config-row input {
+            width: 100%;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background: #0a0a1a;
+            color: #e0e0e0;
+            font-size: 0.85rem;
+        }
+
+        .loading-fullscreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 360px;
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #e94560;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <h1>🦓 Pose Zoo</h1>
+    <p class="subtitle">
+        Labeling page powered by
+        <a href="https://github.com/talmolab/sleap-io.js" target="_blank" rel="noopener">@talmolab/sleap-io.js</a>
+        v2.
+    </p>
+    <p class="instructions">
+        A random frame from the EMBER-hosted video is decoded with
+        <code>sleap-io.js</code>. Click a label on the right to select it,
+        then click the frame to place a point. Placed points are collected
+        into a <code>LabeledFrame</code> / <code>Instance</code> and can be
+        submitted to the annotation-receiver backend.
+    </p>
+
+    <div class="controls">
+        <span class="frame-info" id="frameInfo">Loading…</span>
+        <button id="newFrameBtn" disabled>🎲 New Random Frame</button>
+        <button id="resetBtn" disabled>🔄 Reset Labels</button>
+        <button id="submitBtn" disabled>📤 Submit Labels</button>
+    </div>
+
+    <div class="main-container">
+        <div>
+            <div class="canvas-container" id="canvasContainer" style="display:none;">
+                <canvas id="frameCanvas"></canvas>
+            </div>
+            <div class="loading-fullscreen" id="initialLoading">
+                <div class="spinner"></div>
+                Loading sleap-io.js &amp; extracting a random frame…
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h2>🏷️ Skeleton</h2>
+            <div class="label-palette" id="labelPalette"></div>
+
+            <div class="config-row">
+                <label for="serverUrl">Server endpoint</label>
+                <input type="text" id="serverUrl" value="https://your-server.example.com/api/annotations">
+            </div>
+            <div class="config-row">
+                <label for="apiSecret">API secret (Bearer)</label>
+                <input type="password" id="apiSecret" placeholder="optional — sent as Authorization header">
+            </div>
+
+            <div class="output-section">
+                <h3>JSON Preview</h3>
+                <pre id="jsonOutput">{ "labels": [] }</pre>
+            </div>
+
+            <div id="statusMsg"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // ============================================================
+        // sleap-io.js v2 imports
+        // ============================================================
+        // `Point` / `PointsArray` are TypeScript *types*, so we don't
+        // import them — we build plain `{ xy, visible, complete }`
+        // object literals that match the `Point` shape at runtime.
+        import {
+            loadVideo,
+            Video,
+            Skeleton,
+            Node,
+            Edge,
+            Instance,
+            LabeledFrame,
+            Labels,
+        } from "@talmolab/sleap-io.js";
+
+        // ============================================================
+        // Configuration
+        // ============================================================
+        // The same EMBER-hosted clip used by the original `pozoo`
+        // project — kept here so behaviour is comparable.
+        const VIDEO_URL =
+            "https://ember-open-data.s3.amazonaws.com/blobs/59e/7d8/" +
+            "59e7d85b-6827-4e62-977a-bab97c54df82";
+
+        // Skeleton definition. Node IDs must match the backend's
+        // REQUIRED_LABEL_IDS set.
+        const LABEL_DEFINITIONS = [
+            { id: "left_front_paw",  name: "Left Front Paw",  color: "#ff4444" },
+            { id: "right_front_paw", name: "Right Front Paw", color: "#44ff44" },
+            { id: "left_hind_paw",   name: "Left Hind Paw",   color: "#4488ff" },
+            { id: "right_hind_paw",  name: "Right Hind Paw",  color: "#ffaa00" },
+            { id: "nose",            name: "Nose",            color: "#ff44ff" },
+            { id: "tail_base",       name: "Tail Base",       color: "#44ffff" },
+        ];
+
+        // Sensible skeletal edges so we can later draw bones between
+        // points. Not strictly required for click-to-label but keeps the
+        // Skeleton model semantically meaningful.
+        const EDGE_DEFINITIONS = [
+            ["nose", "tail_base"],
+            ["nose", "left_front_paw"],
+            ["nose", "right_front_paw"],
+            ["tail_base", "left_hind_paw"],
+            ["tail_base", "right_hind_paw"],
+        ];
+
+        // ============================================================
+        // Build a sleap-io.js Skeleton
+        // ============================================================
+        const skeleton = new Skeleton({
+            name: "pose-zoo",
+            nodes: LABEL_DEFINITIONS.map((d) => new Node(d.id)),
+        });
+        for (const [src, dst] of EDGE_DEFINITIONS) {
+            skeleton.edges.push(
+                new Edge(skeleton.nodes[skeleton.index(src)], skeleton.nodes[skeleton.index(dst)])
+            );
+        }
+
+        // ============================================================
+        // App state
+        // ============================================================
+        const state = {
+            videoModel: null,      // sleap-io.js Video model
+            videoMeta: null,       // { fps, totalFrames, width, height }
+            frameIndex: 0,
+            activeLabel: LABEL_DEFINITIONS[0].id,
+            // Map: nodeId -> { pixelX, pixelY, displayX, displayY, element }
+            placed: new Map(),
+            displayScale: 1,
+            dragging: null,        // { id, offsetX, offsetY }
+            justDragged: false,
+        };
+
+        // ============================================================
+        // DOM
+        // ============================================================
+        const canvas = document.getElementById("frameCanvas");
+        const ctx = canvas.getContext("2d");
+        const canvasContainer = document.getElementById("canvasContainer");
+        const initialLoading = document.getElementById("initialLoading");
+        const labelPalette = document.getElementById("labelPalette");
+        const jsonOutput = document.getElementById("jsonOutput");
+        const frameInfo = document.getElementById("frameInfo");
+        const statusMsg = document.getElementById("statusMsg");
+        const newFrameBtn = document.getElementById("newFrameBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const submitBtn = document.getElementById("submitBtn");
+        const serverUrlInput = document.getElementById("serverUrl");
+        const apiSecretInput = document.getElementById("apiSecret");
+
+        // ============================================================
+        // UI: label palette
+        // ============================================================
+        function initPalette() {
+            for (const def of LABEL_DEFINITIONS) {
+                const item = document.createElement("div");
+                item.className = "label-item";
+                item.dataset.labelId = def.id;
+                item.innerHTML = `
+                    <div class="color-swatch" style="background:${def.color}"></div>
+                    <span>${def.name}</span>
+                    <span class="coords" id="coords-${def.id}">—</span>
+                    <span class="status-icon" id="status-${def.id}">○</span>
+                `;
+                item.addEventListener("click", () => selectLabel(def.id));
+                labelPalette.appendChild(item);
+            }
+            selectLabel(LABEL_DEFINITIONS[0].id);
+        }
+
+        function selectLabel(id) {
+            state.activeLabel = id;
+            document.querySelectorAll(".label-item").forEach((el) => {
+                el.classList.toggle("active", el.dataset.labelId === id);
+            });
+        }
+
+        function setLabelPlaced(id, placed) {
+            const item = document.querySelector(`.label-item[data-label-id="${id}"]`);
+            if (!item) return;
+            item.classList.toggle("placed", placed);
+            const icon = document.getElementById(`status-${id}`);
+            if (icon) icon.textContent = placed ? "●" : "○";
+            const coords = document.getElementById(`coords-${id}`);
+            if (coords) {
+                const p = state.placed.get(id);
+                coords.textContent = p ? `${p.pixelX.toFixed(0)}, ${p.pixelY.toFixed(0)}` : "—";
+            }
+        }
+
+        // ============================================================
+        // Video loading via sleap-io.js
+        // ============================================================
+        async function loadVideoModel() {
+            const video = await loadVideo(VIDEO_URL);
+            // `getFrameTimes` materialises the per-frame timeline,
+            // which lets us know totalFrames + fps reliably. Some
+            // backends don't expose it, in which case we fall back to
+            // the video's reported shape/fps.
+            const times = (await video.getFrameTimes()) ?? null;
+            const shape = video.shape; // [frames, h, w, c] | null
+            const totalFrames = times?.length ?? shape?.[0] ?? 0;
+            let fps = video.fps;
+            if (fps == null || !Number.isFinite(fps)) {
+                if (times && times.length > 1) {
+                    fps = (times.length - 1) / (times[times.length - 1] - times[0]);
+                } else {
+                    fps = 30;
+                }
+            }
+            state.videoModel = video;
+            state.videoMeta = {
+                fps,
+                totalFrames,
+                width: shape?.[2] ?? 0,
+                height: shape?.[1] ?? 0,
+            };
+        }
+
+        // ============================================================
+        // Random frame extraction via sleap-io.js
+        // ============================================================
+        async function loadRandomFrame() {
+            if (!state.videoModel) return;
+            const { totalFrames } = state.videoMeta;
+            const idx = Math.floor(Math.random() * Math.max(1, totalFrames));
+            await showFrame(idx);
+        }
+
+        async function showFrame(idx) {
+            setControlsEnabled(false);
+            frameInfo.textContent = `Decoding frame ${idx}…`;
+
+            const bitmap = await state.videoModel.getFrame(idx);
+
+            // Resolve actual frame dimensions (the backend may report
+            // them on the bitmap itself even if shape is unknown).
+            const w = bitmap?.width ?? state.videoMeta.width;
+            const h = bitmap?.height ?? state.videoMeta.height;
+            canvas.width = w;
+            canvas.height = h;
+            state.videoMeta.width = w;
+            state.videoMeta.height = h;
+
+            ctx.clearRect(0, 0, w, h);
+            if (bitmap instanceof ImageBitmap) {
+                ctx.drawImage(bitmap, 0, 0, w, h);
+            } else if (bitmap instanceof ImageData) {
+                ctx.putImageData(bitmap, 0, 0);
+            }
+
+            // Display sizing — scale down to a max width but preserve
+            // the underlying coordinate system.
+            const maxDisplayWidth = 720;
+            const scale = Math.min(maxDisplayWidth / w, 1);
+            state.displayScale = scale;
+            canvas.style.width = `${w * scale}px`;
+            canvas.style.height = `${h * scale}px`;
+
+            state.frameIndex = idx;
+            clearAllLabels();
+            canvasContainer.style.display = "inline-block";
+            initialLoading.style.display = "none";
+
+            frameInfo.textContent =
+                `Frame ${idx} / ${state.videoMeta.totalFrames}  ` +
+                `(${w}×${h} @ ${state.videoMeta.fps.toFixed(2)} fps)`;
+            updateJSON();
+            setControlsEnabled(true);
+        }
+
+        function setControlsEnabled(enabled) {
+            newFrameBtn.disabled = !enabled;
+            resetBtn.disabled = !enabled;
+            submitBtn.disabled = !enabled;
+        }
+
+        // ============================================================
+        // Label placement + drag
+        // ============================================================
+        canvasContainer.addEventListener("click", (e) => {
+            if (state.justDragged) {
+                state.justDragged = false;
+                return;
+            }
+            if (!state.activeLabel) return;
+            const { pixelX, pixelY, displayX, displayY } = clientToPixel(e);
+            placeLabel(state.activeLabel, pixelX, pixelY, displayX, displayY);
+            autoAdvance();
+            updateJSON();
+        });
+
+        function clientToPixel(e) {
+            const rect = canvas.getBoundingClientRect();
+            const displayX = e.clientX - rect.left;
+            const displayY = e.clientY - rect.top;
+            const scaleX = state.videoMeta.width / rect.width;
+            const scaleY = state.videoMeta.height / rect.height;
+            const pixelX = Math.max(0, Math.min(state.videoMeta.width - 1,
+                Math.round(displayX * scaleX)));
+            const pixelY = Math.max(0, Math.min(state.videoMeta.height - 1,
+                Math.round(displayY * scaleY)));
+            return { pixelX, pixelY, displayX, displayY };
+        }
+
+        function placeLabel(id, pixelX, pixelY, displayX, displayY) {
+            const def = LABEL_DEFINITIONS.find((d) => d.id === id);
+            if (!def) return;
+
+            // Remove previous dot
+            const prev = state.placed.get(id);
+            if (prev?.element) prev.element.remove();
+
+            const dot = document.createElement("div");
+            dot.className = "label-dot";
+            dot.style.background = def.color;
+            dot.style.left = `${displayX}px`;
+            dot.style.top = `${displayY}px`;
+            dot.dataset.labelId = id;
+
+            dot.addEventListener("mousedown", (ev) => {
+                ev.preventDefault();
+                state.dragging = { id, startX: ev.clientX, startY: ev.clientY };
+            });
+
+            canvasContainer.appendChild(dot);
+            state.placed.set(id, {
+                pixelX, pixelY, displayX, displayY, element: dot,
+            });
+            setLabelPlaced(id, true);
+        }
+
+        document.addEventListener("mousemove", (e) => {
+            if (!state.dragging) return;
+            const moved = Math.hypot(e.clientX - state.dragging.startX,
+                                     e.clientY - state.dragging.startY);
+            if (moved < 3) return;
+            const { id } = state.dragging;
+            const { pixelX, pixelY, displayX, displayY } = clientToPixel(e);
+            const entry = state.placed.get(id);
+            if (!entry) return;
+            entry.pixelX = pixelX;
+            entry.pixelY = pixelY;
+            entry.displayX = displayX;
+            entry.displayY = displayY;
+            entry.element.style.left = `${displayX}px`;
+            entry.element.style.top = `${displayY}px`;
+            setLabelPlaced(id, true);
+            state.justDragged = true;
+        });
+
+        document.addEventListener("mouseup", () => {
+            if (state.dragging) {
+                state.dragging = null;
+                updateJSON();
+            }
+        });
+
+        function autoAdvance() {
+            const idx = LABEL_DEFINITIONS.findIndex((d) => d.id === state.activeLabel);
+            for (let i = 1; i <= LABEL_DEFINITIONS.length; i++) {
+                const nextIdx = (idx + i) % LABEL_DEFINITIONS.length;
+                const nextId = LABEL_DEFINITIONS[nextIdx].id;
+                if (!state.placed.has(nextId)) {
+                    selectLabel(nextId);
+                    return;
+                }
+            }
+        }
+
+        function clearAllLabels() {
+            for (const entry of state.placed.values()) {
+                entry.element?.remove();
+            }
+            state.placed.clear();
+            for (const def of LABEL_DEFINITIONS) setLabelPlaced(def.id, false);
+        }
+
+        // ============================================================
+        // Build a sleap-io.js LabeledFrame / Labels object from the
+        // currently-placed points. This is what the v2 model expects
+        // and gives us a future path to writing an SLP file with
+        // `saveSlpToBytes` instead of (or in addition to) JSON.
+        // ============================================================
+        function buildLabelsObject() {
+            const video = new Video({ filename: VIDEO_URL });
+            video.shape = [
+                state.videoMeta.totalFrames,
+                state.videoMeta.height,
+                state.videoMeta.width,
+                3,
+            ];
+
+            // One Instance with one Point per node.
+            const points = skeleton.nodes.map((node) => {
+                const entry = state.placed.get(node.name);
+                if (!entry) {
+                    return { xy: [NaN, NaN], visible: false, complete: false };
+                }
+                return {
+                    xy: [entry.pixelX, entry.pixelY],
+                    visible: true,
+                    complete: true,
+                };
+            });
+            const instance = new Instance({ skeleton, points });
+            const labeledFrame = new LabeledFrame({
+                video,
+                frameIdx: state.frameIndex,
+                instances: [instance],
+            });
+            return new Labels({
+                skeletons: [skeleton],
+                videos: [video],
+                labeledFrames: [labeledFrame],
+            });
+        }
+
+        // Backend payload — shape matches the receiver in backend.py
+        // (which itself mirrors the original pozoo schema).
+        function buildPayload() {
+            const labels = LABEL_DEFINITIONS.map((def) => {
+                const entry = state.placed.get(def.id);
+                return {
+                    id: def.id,
+                    name: def.name,
+                    placed: !!entry,
+                    pixel_x: entry ? entry.pixelX : null,
+                    pixel_y: entry ? entry.pixelY : null,
+                };
+            });
+            return {
+                video_url: VIDEO_URL,
+                frame_index: state.frameIndex,
+                total_frames: state.videoMeta?.totalFrames ?? 0,
+                fps: state.videoMeta?.fps ?? 0,
+                frame_width: state.videoMeta?.width ?? 0,
+                frame_height: state.videoMeta?.height ?? 0,
+                timestamp: new Date().toISOString(),
+                labels,
+            };
+        }
+
+        function updateJSON() {
+            jsonOutput.textContent = JSON.stringify(buildPayload(), null, 2);
+        }
+
+        // ============================================================
+        // Buttons
+        // ============================================================
+        newFrameBtn.addEventListener("click", () => {
+            loadRandomFrame().catch((err) => {
+                console.error(err);
+                showStatus("error", `Failed to decode frame: ${err.message}`);
+                setControlsEnabled(true);
+            });
+        });
+
+        resetBtn.addEventListener("click", () => {
+            clearAllLabels();
+            updateJSON();
+        });
+
+        submitBtn.addEventListener("click", async () => {
+            if (state.placed.size === 0) {
+                showStatus("error", "No labels placed yet.");
+                return;
+            }
+            const url = serverUrlInput.value.trim();
+            if (!url) {
+                showStatus("error", "Please enter a server endpoint.");
+                return;
+            }
+
+            // Materialise a sleap-io.js Labels object too — even though
+            // we only POST JSON for now, this confirms the data is
+            // serialisable through the v2 model.
+            try {
+                buildLabelsObject();
+            } catch (err) {
+                console.error("Labels build failed:", err);
+            }
+
+            showStatus("info", "Sending…");
+            try {
+                const headers = { "Content-Type": "application/json" };
+                const secret = apiSecretInput.value.trim();
+                if (secret) headers["Authorization"] = `Bearer ${secret}`;
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify(buildPayload()),
+                });
+                const respText = await response.text();
+                if (response.ok) {
+                    showStatus("success",
+                        `✅ Submitted (${response.status}). ${respText.substring(0, 120)}`);
+                } else {
+                    showStatus("error",
+                        `❌ ${response.status} ${response.statusText}: ${respText.substring(0, 200)}`);
+                }
+            } catch (err) {
+                showStatus("error", `❌ Network error: ${err.message}`);
+            }
+        });
+
+        function showStatus(type, message) {
+            statusMsg.className = type;
+            statusMsg.textContent = message;
+            statusMsg.style.display = "block";
+            if (type !== "error") {
+                setTimeout(() => {
+                    if (statusMsg.textContent === message) {
+                        statusMsg.style.display = "none";
+                    }
+                }, 5000);
+            }
+        }
+
+        // ============================================================
+        // Boot
+        // ============================================================
+        initPalette();
+        updateJSON();
+        (async () => {
+            try {
+                await loadVideoModel();
+                await loadRandomFrame();
+            } catch (err) {
+                console.error(err);
+                initialLoading.innerHTML =
+                    `❌ Failed to load video via sleap-io.js: ${err.message}`;
+                showStatus("error", err.message);
+            }
+        })();
+    </script>
+</body>
+</html>
