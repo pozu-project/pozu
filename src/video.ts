@@ -23,9 +23,41 @@ export const VIDEO_URL =
     "https://ember-open-data.s3.amazonaws.com/blobs/59e/7d8/" +
     "59e7d85b-6827-4e62-977a-bab97c54df82";
 
+/**
+ * Wrap a promise so that it rejects after `ms` if it hasn't settled.
+ * The underlying operation isn't cancelled — sleap-io.js's mp4box
+ * backend has no abort hook — but we surface a real error to the boot
+ * path so the UI can recover instead of hanging on the loading
+ * overlay forever.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+        timer = setTimeout(
+            () => reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`)),
+            ms
+        );
+    });
+    return Promise.race([promise, timeout]).finally(() => {
+        if (timer) clearTimeout(timer);
+    }) as Promise<T>;
+}
+
+/** Hard ceiling on how long boot will wait for sleap-io.js to open the EMBER clip. */
+const LOAD_TIMEOUT_MS = 45_000;
+
 export async function loadVideoModel(url: string = VIDEO_URL): Promise<VideoModel> {
-    const video = await loadVideo(url, { backend: "mp4box" });
-    const times = (await video.getFrameTimes()) ?? null;
+    const video = await withTimeout(
+        loadVideo(url, { backend: "mp4box" }),
+        LOAD_TIMEOUT_MS,
+        "loadVideo"
+    );
+    const times =
+        (await withTimeout(
+            Promise.resolve(video.getFrameTimes()),
+            LOAD_TIMEOUT_MS,
+            "getFrameTimes"
+        )) ?? null;
     const shape = video.shape;
     const totalFrames = times?.length ?? shape?.[0] ?? 0;
     let fps = video.fps;

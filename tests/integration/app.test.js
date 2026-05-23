@@ -10,10 +10,9 @@ test.describe("Pose Zoo labeling page", () => {
         await expect(page.locator(".subtitle")).toContainText("sleap-io.js");
     });
 
-    test("shows the three primary controls (initially disabled)", async ({ page }) => {
+    test("shows the three primary controls", async ({ page }) => {
         for (const id of ["#newFrameBtn", "#resetBtn", "#downloadBtn"]) {
             await expect(page.locator(id)).toBeVisible();
-            await expect(page.locator(id)).toBeDisabled();
         }
     });
 

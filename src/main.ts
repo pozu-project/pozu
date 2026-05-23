@@ -115,7 +115,10 @@ async function showFrame(idx: number) {
 }
 
 async function loadRandomFrame() {
-    if (!videoModel) return;
+    if (!videoModel) {
+        await ensureVideoModel();
+        if (!videoModel) return;
+    }
     const total = await refreshTotalFrames(videoModel);
     if (total < 2) {
         console.warn(`Backend reports ${total} frame(s); falling back to frame 0.`);
@@ -125,12 +128,24 @@ async function loadRandomFrame() {
     await showFrame(pickRandomFrame(total, frameIndex));
 }
 
+async function ensureVideoModel() {
+    initialLoading.textContent = "Loading sleap-io.js & opening the EMBER video…";
+    initialLoading.style.display = "flex";
+    videoModel = await loadVideoModel();
+}
+
 // ---- Buttons ----
 newFrameBtn.addEventListener("click", () => {
     loadRandomFrame().catch((err: Error) => {
         console.error(err);
-        showStatus("error", `Failed to decode frame: ${err.message}`);
-        setControlsEnabled(true);
+        const msg = err?.message ?? String(err);
+        showStatus("error", `Failed to load frame: ${msg}`);
+        initialLoading.textContent = `❌ ${msg}. Click 🎲 New Random Frame to retry.`;
+        initialLoading.style.display = "flex";
+        // Keep the controls enabled so the user can retry.
+        newFrameBtn.disabled = false;
+        resetBtn.disabled = false;
+        downloadBtn.disabled = false;
     });
 });
 
@@ -185,11 +200,17 @@ downloadBtn.addEventListener("click", async () => {
 updateJSON();
 (async () => {
     try {
-        videoModel = await loadVideoModel();
+        await ensureVideoModel();
         await loadRandomFrame();
     } catch (err) {
         console.error(err);
-        initialLoading.innerHTML = `❌ Failed to load video via sleap-io.js: ${(err as Error).message}`;
-        showStatus("error", (err as Error).message);
+        const msg = (err as Error).message;
+        initialLoading.textContent = `❌ Failed to load video via sleap-io.js: ${msg}. Click 🎲 New Random Frame to retry.`;
+        showStatus("error", msg);
+        // Re-enable controls so the user can retry instead of being
+        // permanently stuck on the loading overlay.
+        newFrameBtn.disabled = false;
+        resetBtn.disabled = false;
+        downloadBtn.disabled = false;
     }
 })();
