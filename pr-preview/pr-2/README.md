@@ -2,14 +2,9 @@
 
 Inspired by Galaxy Zoo, but for pose estimation.
 
-This project is a sibling of [`pozoo`](https://github.com/CodyCBakerPhD/pozoo):
-random frames are pulled from a video hosted on EMBER and presented for
-keypoint labeling. The difference here is that the labeling page is built
-on top of the new v2 [`@talmolab/sleap-io.js`](https://github.com/talmolab/sleap-io.js)
-library and its browser-side data model (`Skeleton`, `Instance`, `Point`,
-`LabeledFrame`, `Labels`) plus the `loadVideo` / `Mp4BoxVideoBackend`
-video reader. See <https://iojs.sleap.ai/latest/#sleap-iojs> for the
-upstream docs.
+Random frames are pulled from a video hosted on EMBER and presented for keypoint labeling.
+This project uses the new v2 [`@talmolab/sleap-io.js`](https://github.com/talmolab/sleap-io.js) library and its browser-side data model (`Skeleton`, `Instance`, `Point`, `LabeledFrame`, `Labels`) plus the `loadVideo` / `Mp4BoxVideoBackend` video reader.
+See <https://iojs.sleap.ai/latest/#sleap-iojs> for the upstream docs.
 
 ## Layout
 
@@ -36,7 +31,4 @@ python backend.py
 # → http://localhost:5000/docs/
 ```
 
-Then point the labeling page's "Server endpoint" at
-`http://localhost:5000/api/annotations` and provide the API secret you
-configured via the `API_SECRET` environment variable.
-
+Then point the labeling page's "Server endpoint" at `http://localhost:5000/api/annotations` and provide the API secret you configured via the `API_SECRET` environment variable.
