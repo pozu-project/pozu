@@ -3,6 +3,7 @@
  * labeler module, and the sleap-io.js-backed video loader.
  */
 import "./styles.css";
+import { saveSlpToBytes } from "@talmolab/sleap-io.js";
 import { createLabeler } from "./labeler.js";
 import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "./video.js";
 import { buildPayload, buildLabelsObject, pickRandomFrame, type VideoMeta } from "./payload.js";
@@ -195,40 +196,36 @@ downloadBtn.addEventListener("click", async () => {
         return;
     }
 
-    // Materialise a sleap-io.js Labels object too — even though we
-    // only export JSON for now, this confirms the data is serialisable
-    // through the v2 model.
     const meta = getVideoMeta();
-    if (meta) {
-        try {
-            buildLabelsObject({
-                videoUrl: VIDEO_URL,
-                frameIndex,
-                videoMeta: meta,
-                placed: labeler.placed,
-                skeleton: labeler.skeleton,
-            });
-        } catch (err) {
-            console.error("Labels build failed:", err);
-        }
+    if (!meta) {
+        showStatus("error", "Video metadata unavailable. Load a frame and try again.");
+        return;
     }
 
-    const payload = buildPayload({
-        videoUrl: VIDEO_URL,
-        frameIndex,
-        videoMeta: meta,
-        placed: labeler.placed,
-    });
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `pose-zoo_frame-${frameIndex}_${payload.timestamp.replace(/[:.]/g, "-")}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showStatus("success", `✅ Downloaded ${a.download}`);
+    try {
+        const labels = buildLabelsObject({
+            videoUrl: VIDEO_URL,
+            frameIndex,
+            videoMeta: meta,
+            placed: labeler.placed,
+            skeleton: labeler.skeleton,
+        });
+        const slpBytes = await saveSlpToBytes(labels);
+        const blob = new Blob([new Uint8Array(slpBytes)], { type: "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `pose-zoo_frame-${frameIndex}_${new Date().toISOString().replace(/[:.]/g, "-")}.slp`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus("success", `✅ Downloaded ${a.download}`);
+    } catch (err) {
+        console.error("SLP export failed:", err);
+        const msg = err instanceof Error ? err.message : String(err);
+        showStatus("error", `Failed to export .slp: ${msg}`);
+    }
 });
 
 // ---- Boot ----
