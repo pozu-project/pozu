@@ -5,9 +5,10 @@ test.describe("Pose Zoo labeling page", () => {
         await page.goto("/");
     });
 
-    test("renders the header and subtitle", async ({ page }) => {
-        await expect(page.locator("h1")).toContainText("Pose Zoo");
-        await expect(page.locator(".subtitle")).toContainText("sleap-io.js");
+    test("renders top nav title and page credit", async ({ page }) => {
+        await expect(page.locator(".top-nav-brand")).toContainText("Pose Zoo");
+        await expect(page.locator(".top-nav-brand")).not.toContainText("🦓");
+        await expect(page.locator(".page-credit")).toContainText("sleap-io.js");
     });
 
     test("shows the three primary controls", async ({ page }) => {
@@ -15,6 +16,23 @@ test.describe("Pose Zoo labeling page", () => {
             await expect(page.locator(id)).toBeVisible();
         }
         await expect(page.locator("#downloadBtn")).toContainText("Download .slp");
+    });
+
+    test("shows top nav modes and coming soon placeholder for non-label modes", async ({
+        page,
+    }) => {
+        for (const mode of ["binary", "track", "box", "label"]) {
+            await expect(page.locator(`[data-view-mode="${mode}"]`)).toBeVisible();
+        }
+
+        await page.locator('[data-view-mode="binary"]').click();
+        await expect(page.locator("#comingSoonView")).toBeVisible();
+        await expect(page.locator("#comingSoonModeName")).toContainText("Binary");
+        await expect(page.locator("#comingSoonView")).toContainText("Coming soon…");
+
+        await page.locator('[data-view-mode="label"]').click();
+        await expect(page.locator("#labelView")).toBeVisible();
+        await expect(page.locator("#comingSoonView")).toBeHidden();
     });
 
     test("renders one palette entry per label definition", async ({ page }) => {

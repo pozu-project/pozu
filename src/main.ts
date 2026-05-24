@@ -49,6 +49,18 @@ const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
 const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
+const labelView = document.getElementById("labelView") as HTMLElement;
+const comingSoonView = document.getElementById("comingSoonView") as HTMLElement;
+const comingSoonModeName = document.getElementById("comingSoonModeName") as HTMLElement;
+const modeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-view-mode]"));
+
+type ViewMode = "binary" | "track" | "box" | "label";
+const VIEW_MODE_NAMES: Record<ViewMode, string> = {
+    binary: "Binary",
+    track: "Track",
+    box: "Box",
+    label: "Label",
+};
 
 // Mark the overlay so we can verify the bundle actually loaded.
 setStage("Booting pose-zoo… (loading sleap-io.js bundle)");
@@ -74,6 +86,21 @@ function setControlsEnabled(enabled: boolean) {
     newFrameBtn.disabled = !enabled;
     resetBtn.disabled = !enabled;
     downloadBtn.disabled = !enabled;
+}
+
+function setViewMode(mode: ViewMode) {
+    for (const button of modeButtons) {
+        button.classList.toggle("active", button.dataset.viewMode === mode);
+    }
+    if (mode === "label") {
+        labelView.hidden = false;
+        comingSoonView.hidden = true;
+        return;
+    }
+
+    labelView.hidden = true;
+    comingSoonView.hidden = false;
+    comingSoonModeName.textContent = VIEW_MODE_NAMES[mode];
 }
 
 function updateJSON() {
@@ -227,6 +254,14 @@ downloadBtn.addEventListener("click", async () => {
         showStatus("error", `Failed to export .slp: ${msg}`);
     }
 });
+
+for (const button of modeButtons) {
+    button.addEventListener("click", () => {
+        const mode = button.dataset.viewMode as ViewMode | undefined;
+        if (!mode) return;
+        setViewMode(mode);
+    });
+}
 
 // ---- Boot ----
 updateJSON();
