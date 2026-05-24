@@ -22,6 +22,8 @@ See <https://iojs.sleap.ai/latest/#sleap-iojs> for the upstream docs.
 - `.github/workflows/preview.yml` — builds the site with
   `npm run build` and deploys a per-PR static preview of `dist/` to
   the `gh-pages` branch.
+- `.github/workflows/refresh-pages.yml` — publishes the main site from
+  `dist/` to the root of the `gh-pages` branch on pushes to `main`.
 - `.github/workflows/test.yml` — runs the Vitest + Playwright
   suites on every PR.
 
