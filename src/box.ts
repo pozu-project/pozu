@@ -23,7 +23,7 @@ import { submitBoxPayload } from "./box-api.js";
 // loading overlay instead of silently hanging.
 function showFatal(label: string, err: unknown): void {
     const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-    console.error(`[pose-zoo:box] ${label}:`, err);
+    console.error(`[pozu:box] ${label}:`, err);
     const overlay = document.getElementById("initialLoading");
     if (overlay) {
         overlay.textContent = `❌ ${label}: ${msg}. See the browser console for details; click 🎲 New Random Frame to retry.`;
@@ -40,12 +40,12 @@ window.addEventListener("unhandledrejection", (e) =>
 );
 
 function setStage(message: string): void {
-    console.info(`[pose-zoo:box] ${message}`);
+    console.info(`[pozu:box] ${message}`);
     const overlay = document.getElementById("initialLoading");
     if (overlay) overlay.textContent = message;
 }
 
-console.info("[pose-zoo:box] box.ts module evaluating");
+console.info("[pozu:box] box.ts module evaluating");
 
 // ---- DOM ----
 const canvas = document.getElementById("frameCanvas") as HTMLCanvasElement;
@@ -62,7 +62,7 @@ const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
 const boxStatusIcon = document.getElementById("boxStatusIcon") as HTMLElement;
 const boxCoordsText = document.getElementById("boxCoordsText") as HTMLElement;
 
-setStage("Booting pose-zoo box mode… (loading sleap-io.js bundle)");
+setStage("Booting pozu box mode… (loading sleap-io.js bundle)");
 
 // ---- App state ----
 let videoModel: VideoModel | null = null;
