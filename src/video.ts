@@ -187,7 +187,7 @@ class HtmlVideoBackend implements VideoBackend {
 }
 
 export async function loadVideoModel(url: string = VIDEO_URL): Promise<VideoModel> {
-    console.info(`[pose-zoo] loadVideoModel: opening ${url} via HTML5 <video>`);
+    console.info(`[pozu] loadVideoModel: opening ${url} via HTML5 <video>`);
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
     video.preload = "auto";
@@ -212,7 +212,7 @@ export async function loadVideoModel(url: string = VIDEO_URL): Promise<VideoMode
     const fps = DEFAULT_FPS;
     const backend = new HtmlVideoBackend(video, fps);
     console.info(
-        `[pose-zoo] HTML5 video ready: shape=${JSON.stringify(backend.shape)} ` +
+        `[pozu] HTML5 video ready: shape=${JSON.stringify(backend.shape)} ` +
             `duration=${video.duration.toFixed(2)}s fps=${fps} (assumed)`
     );
     return {

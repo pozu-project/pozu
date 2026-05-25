@@ -13,7 +13,7 @@ import { buildPayload, buildLabelsObject, pickRandomFrame, type VideoMeta } from
 // overlay so failures on the deployed preview don't silently hang.
 function showFatal(label: string, err: unknown): void {
     const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-    console.error(`[pose-zoo] ${label}:`, err);
+    console.error(`[pozu] ${label}:`, err);
     const overlay = document.getElementById("initialLoading");
     if (overlay) {
         overlay.textContent = `❌ ${label}: ${msg}. See the browser console for details; click 🎲 New Random Frame to retry.`;
@@ -30,12 +30,12 @@ window.addEventListener("unhandledrejection", (e) =>
 );
 
 function setStage(message: string): void {
-    console.info(`[pose-zoo] ${message}`);
+    console.info(`[pozu] ${message}`);
     const overlay = document.getElementById("initialLoading");
     if (overlay) overlay.textContent = message;
 }
 
-console.info("[pose-zoo] main.ts module evaluating");
+console.info("[pozu] main.ts module evaluating");
 
 // ---- DOM ----
 const canvas = document.getElementById("frameCanvas") as HTMLCanvasElement;
@@ -62,7 +62,7 @@ const VIEW_MODE_NAMES: Record<ViewMode, string> = {
 };
 
 // Mark the overlay so we can verify the bundle actually loaded.
-setStage("Booting pose-zoo… (loading sleap-io.js bundle)");
+setStage("Booting pozu… (loading sleap-io.js bundle)");
 
 // ---- App state ----
 let videoModel: VideoModel | null = null;
@@ -241,7 +241,7 @@ downloadBtn.addEventListener("click", async () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `pose-zoo_frame-${frameIndex}_${new Date().toISOString().replace(/[:.]/g, "-")}.slp`;
+        a.download = `pozu_frame-${frameIndex}_${new Date().toISOString().replace(/[:.]/g, "-")}.slp`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

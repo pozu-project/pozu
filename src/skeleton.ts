@@ -1,5 +1,5 @@
 /**
- * Skeleton definition for pose-zoo: node IDs must match the
+ * Skeleton definition for pozu: node IDs must match the
  * REQUIRED_LABEL_IDS set enforced by `backend.py` (and the original
  * pozoo schema).
  *
@@ -35,7 +35,7 @@ export const EDGE_DEFINITIONS: ReadonlyArray<readonly [string, string]> = [
 /** Construct a sleap-io.js `Skeleton` from {@link LABEL_DEFINITIONS}. */
 export function buildSkeleton(): Skeleton {
     const skeleton = new Skeleton({
-        name: "pose-zoo",
+        name: "pozu",
         nodes: LABEL_DEFINITIONS.map((d) => new Node(d.id)),
     });
     for (const [src, dst] of EDGE_DEFINITIONS) {

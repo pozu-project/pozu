@@ -1,7 +1,7 @@
 import type { BoxPayload } from "./box-payload.js";
 
 export const BOX_ANNOTATION_API_URL =
-    "https://pose-zoo-codycbakerphd.pythonanywhere.com/api/v1/annotations/bbox";
+    "https://pozu-codycbakerphd.pythonanywhere.com/api/v1/annotations/bbox";
 
 export async function submitBoxPayload(
     payload: BoxPayload,
