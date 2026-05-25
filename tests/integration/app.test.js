@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Pose Zoo labeling page", () => {
+test.describe("Pozu labeling page", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto("/");
     });
 
     test("renders top nav title and page credit", async ({ page }) => {
-        await expect(page.locator(".top-nav-brand")).toContainText("Pose Zoo");
+        await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
         await expect(page.locator(".top-nav-brand")).not.toContainText("🦓");
         await expect(page.locator(".page-credit")).toContainText("sleap-io.js");
     });
@@ -78,13 +78,13 @@ test.describe("Pose Zoo labeling page", () => {
     });
 });
 
-test.describe("Pose Zoo box-selection page", () => {
+test.describe("Pozu box-selection page", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto("/box.html");
     });
 
     test("renders the box page chrome with Box active in the nav", async ({ page }) => {
-        await expect(page.locator(".top-nav-brand")).toContainText("Pose Zoo");
+        await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
         const boxLink = page.locator('a.top-nav-link[href*="box.html"]');
         await expect(boxLink).toHaveClass(/active/);
     });

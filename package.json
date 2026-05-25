@@ -1,5 +1,5 @@
 {
-    "name": "pose-zoo",
+    "name": "pozu",
     "version": "0.1.0",
     "description": "Random EMBER frame labeling page powered by @talmolab/sleap-io.js, plus a Flask annotation receiver.",
     "private": true,
@@ -18,13 +18,13 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/CodyCBakerPhD/pose-zoo.git"
+        "url": "git+https://github.com/CodyCBakerPhD/pozu.git"
     },
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/CodyCBakerPhD/pose-zoo/issues"
+        "url": "https://github.com/CodyCBakerPhD/pozu/issues"
     },
-    "homepage": "https://github.com/CodyCBakerPhD/pose-zoo#readme",
+    "homepage": "https://github.com/CodyCBakerPhD/pozu#readme",
     "devDependencies": {
         "@playwright/test": "^1.49.0",
         "@types/node": "^22.10.0",
