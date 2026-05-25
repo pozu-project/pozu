@@ -35,6 +35,20 @@ body {
     font-size: 1.1rem;
     font-weight: 700;
     color: #f8fafc;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.top-nav-brand:visited {
+    color: #f8fafc;
+}
+
+.top-nav-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
 }
 
 .top-nav-links {
@@ -52,6 +66,13 @@ body {
     font-weight: 600;
     font-size: 0.92rem;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.top-nav-link:visited {
+    color: #94a3b8;
 }
 
 .top-nav-link:hover {
@@ -59,7 +80,8 @@ body {
     background: rgba(148, 163, 184, 0.16);
 }
 
-.top-nav-link.active {
+.top-nav-link.active,
+.top-nav-link.active:visited {
     color: #38bdf8;
     background: rgba(56, 189, 248, 0.16);
 }

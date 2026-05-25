@@ -7,6 +7,10 @@ test.describe("Pozu labeling page", () => {
 
     test("renders top nav title and page credit", async ({ page }) => {
         await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
+        await expect(page.locator(".top-nav-brand .top-nav-logo")).toHaveAttribute(
+            "src",
+            /\/pozu-logo\.svg$/
+        );
         await expect(page.locator(".top-nav-brand")).not.toContainText("🦓");
         await expect(page.locator(".page-credit")).toContainText("sleap-io.js");
     });
@@ -85,8 +89,21 @@ test.describe("Pozu box-selection page", () => {
 
     test("renders the box page chrome with Box active in the nav", async ({ page }) => {
         await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
+        await expect(page.locator(".top-nav-brand .top-nav-logo")).toHaveAttribute(
+            "src",
+            /\/pozu-logo\.svg$/
+        );
         const boxLink = page.locator('a.top-nav-link[href*="box.html"]');
         await expect(boxLink).toHaveClass(/active/);
+    });
+
+    test("nav links keep button-like styling on box page", async ({ page }) => {
+        const textDecoration = await page
+            .locator('a.top-nav-link[href*="#binary"]')
+            .evaluate((el) => {
+                return window.getComputedStyle(el).textDecorationLine;
+            });
+        expect(textDecoration).toBe("none");
     });
 
     test("shows box controls with updated bottom actions", async ({ page }) => {
