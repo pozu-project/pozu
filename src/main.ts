@@ -3,9 +3,10 @@
  * labeler module, and the sleap-io.js-backed video loader.
  */
 import "./styles.css";
+import { saveSlpToBytes } from "@talmolab/sleap-io.js";
 import { createLabeler } from "./labeler.js";
 import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "./video.js";
-import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
+import { buildLabelsObject, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 
 // ---- Diagnostics ----
@@ -112,6 +113,15 @@ function showStatus(type: "info" | "success" | "error", message: string) {
     }
 }
 
+function encodeBytesAsBase64(bytes: Uint8Array): string {
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+}
+
 async function showFrame(idx: number) {
     if (!videoModel) return;
     setControlsEnabled(false);
@@ -210,16 +220,18 @@ downloadBtn.addEventListener("click", async () => {
         return;
     }
 
-    const payload = buildPayload({
+    const labels = buildLabelsObject({
         videoUrl: VIDEO_URL,
         frameIndex,
         videoMeta: meta,
         placed: labeler.placed,
+        skeleton: labeler.skeleton,
     });
+    const labelsFileContent = encodeBytesAsBase64(await saveSlpToBytes(labels));
 
     setControlsEnabled(false);
     try {
-        await submitLabelPayload(payload);
+        await submitLabelPayload(labelsFileContent);
     } catch (err) {
         console.error("Label JSON submission failed:", err);
         const msg = err instanceof Error ? err.message : String(err);

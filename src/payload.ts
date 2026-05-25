@@ -85,8 +85,7 @@ export interface BuildLabelsOptions {
 
 /**
  * Materialise the placed points as a sleap-io.js `Labels` object.
- * Forward-compatible with `saveSlpToBytes` even though we only POST
- * JSON today.
+ * Used with `saveSlpToBytes` before label submission.
  */
 export function buildLabelsObject(opts: BuildLabelsOptions): Labels {
     const video = new Video({ filename: opts.videoUrl });

@@ -1,20 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildPayload } from "../../src/payload.ts";
 import { LABEL_ANNOTATION_API_URL, submitLabelPayload } from "../../src/label-api.ts";
 
-const payload = buildPayload({
-    videoUrl: "https://example.com/video.mp4",
-    frameIndex: 7,
-    videoMeta: { totalFrames: 100, fps: 30, width: 640, height: 480 },
-    placed: new Map(),
-    now: () => "2024-01-02T03:04:05.000Z",
-});
+const labelsFileContent = "AQIDBA==";
 
 describe("submitLabelPayload", () => {
     it("posts JSON to the labels annotation endpoint", async () => {
         const fetchMock = vi.fn(async () => new Response("", { status: 202 }));
 
-        await submitLabelPayload(payload, fetchMock as unknown as typeof fetch);
+        await submitLabelPayload(labelsFileContent, fetchMock as unknown as typeof fetch);
 
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(fetchMock).toHaveBeenCalledWith(LABEL_ANNOTATION_API_URL, {
@@ -23,7 +16,7 @@ describe("submitLabelPayload", () => {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ labels_file_content: labelsFileContent }),
         });
     });
 
@@ -33,7 +26,7 @@ describe("submitLabelPayload", () => {
         );
 
         await expect(
-            submitLabelPayload(payload, fetchMock as unknown as typeof fetch)
+            submitLabelPayload(labelsFileContent, fetchMock as unknown as typeof fetch)
         ).rejects.toThrow("Server rejected submission (400 Bad Request): bad payload");
     });
 });

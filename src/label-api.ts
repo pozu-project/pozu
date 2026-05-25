@@ -1,10 +1,8 @@
-import type { BackendPayload } from "./payload.js";
-
 export const LABEL_ANNOTATION_API_URL =
     "https://pozu-codycbakerphd.pythonanywhere.com/api/v1/annotations/labels";
 
 export async function submitLabelPayload(
-    payload: BackendPayload,
+    labelsFileContent: string,
     fetchImpl: typeof fetch = fetch
 ): Promise<void> {
     const response = await fetchImpl(LABEL_ANNOTATION_API_URL, {
@@ -13,7 +11,7 @@ export async function submitLabelPayload(
             "Content-Type": "application/json",
             Accept: "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ labels_file_content: labelsFileContent }),
     });
 
     if (response.ok) return;
