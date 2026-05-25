@@ -25,6 +25,7 @@ test.describe("Pozu labeling page", () => {
         for (const id of ["#newFrameBtn", "#resetBtn", "#downloadBtn"]) {
             await expect(page.locator(id)).toBeVisible();
         }
+        await expect(page.locator("#newFrameBtn")).toContainText("No Subject Present");
         await expect(page.locator("#downloadBtn")).toContainText("Submit");
     });
 
@@ -73,18 +74,12 @@ test.describe("Pozu labeling page", () => {
         );
     });
 
-    test("JSON preview reflects the canonical six-label schema", async ({ page }) => {
-        const text = await page.locator("#jsonOutput").textContent();
-        expect(text).toBeTruthy();
-        const json = JSON.parse(text);
-        expect(json.labels.map((l) => l.id)).toEqual([
-            "left_front_paw",
-            "right_front_paw",
-            "left_hind_paw",
-            "right_hind_paw",
-            "nose",
-            "tail_base",
-        ]);
+    test("hides JSON preview and keeps controls below the frame", async ({ page }) => {
+        await expect(page.locator("#jsonOutput")).toHaveCount(0);
+        await expect(page.locator(".output-section")).toHaveCount(0);
+        await expect(page.locator(".bottom-actions #newFrameBtn")).toBeVisible();
+        await expect(page.locator(".bottom-actions #resetBtn")).toBeVisible();
+        await expect(page.locator(".bottom-actions #downloadBtn")).toBeVisible();
     });
 });
 
