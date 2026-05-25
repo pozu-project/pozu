@@ -447,7 +447,7 @@ canvas {
     font-size: 1.05rem;
 }
 
-.binary-demo {
+.binary-demo:not([hidden]) {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
