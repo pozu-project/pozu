@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Pozu — Box Selection</title>
+      <script type="module" crossorigin src="./assets/box-LFxlNneS.js"></script>
+      <link rel="modulepreload" crossorigin href="./assets/payload-C7vPXPDW.js">
+      <link rel="stylesheet" crossorigin href="./assets/payload-COr_X-8K.css">
+    </head>
+    <body>
+        <header class="top-nav">
+            <div class="top-nav-inner">
+                <div class="top-nav-brand">Pozu</div>
+                <nav class="top-nav-links" aria-label="View modes">
+                    <a class="top-nav-link" href="./index.html#binary">Binary</a>
+                    <a class="top-nav-link" href="./index.html#track">Track</a>
+                    <a class="top-nav-link active" href="./box.html" aria-current="page">Box</a>
+                    <a class="top-nav-link" href="./index.html">Label</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="view-shell">
+            <section id="boxView">
+                <p class="instructions">
+                    Click and drag on the frame to draw the rectangular box that fully contains the
+                    subject, then submit your result and repeat.
+                </p>
+
+                <div class="controls">
+                    <span class="frame-info" id="frameInfo">Loading…</span>
+                    <button id="resetBtn" disabled>🔄 Reset Box</button>
+                </div>
+
+                <div class="main-container">
+                    <div>
+                        <div class="canvas-container" id="canvasContainer" style="display: none">
+                            <canvas id="frameCanvas"></canvas>
+                            <div
+                                class="box-overlay"
+                                id="boxOverlay"
+                                style="display: none"
+                                aria-hidden="true"
+                            ></div>
+                        </div>
+                        <div class="loading-fullscreen" id="initialLoading">
+                            <div class="spinner"></div>
+                            Loading the EMBER video & extracting a random frame…
+                        </div>
+                        <div class="bottom-actions">
+                            <button id="newFrameBtn" disabled>🚫 No Subject Present</button>
+                            <button id="downloadBtn" disabled>📤 Submit</button>
+                        </div>
+                        <div id="statusMsg"></div>
+                    </div>
+                </div>
+            </section>
+
+            <dialog id="errorModal" class="error-modal" aria-labelledby="errorModalTitle">
+                <h2 id="errorModalTitle">We&rsquo;re sorry</h2>
+                <p id="errorModalMessage">
+                    Something went wrong. Please submit an issue at the GitHub issues link.
+                </p>
+                <p>
+                    <a
+                        href="https://github.com/CodyCBakerPhD/pozu/issues"
+                        target="_blank"
+                        rel="noopener"
+                        >Open GitHub issues</a
+                    >
+                </p>
+                <form method="dialog">
+                    <button id="errorModalCloseBtn">Close</button>
+                </form>
+            </dialog>
+
+            <p class="subtitle page-credit">
+                Powered by
+                <a href="https://github.com/talmolab/sleap-io.js" target="_blank" rel="noopener"
+                    >@talmolab/sleap-io.js</a
+                >
+                v2
+            </p>
+        </main>
+
+    </body>
+</html>
