@@ -1,4 +1,4 @@
-# Pose Zoo
+# Pozu
 
 Inspired by Galaxy Zoo, but for pose estimation.
 
