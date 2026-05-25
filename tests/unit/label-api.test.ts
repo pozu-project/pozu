@@ -2,12 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { LABEL_ANNOTATION_API_URL, submitLabelPayload } from "../../src/label-api.ts";
 
 const labelsFileContent = "AQIDBA==";
+const videoUrl = "https://example.com/video.mp4";
 
 describe("submitLabelPayload", () => {
     it("posts JSON to the labels annotation endpoint", async () => {
         const fetchMock = vi.fn(async () => new Response("", { status: 202 }));
 
-        await submitLabelPayload(labelsFileContent, fetchMock as unknown as typeof fetch);
+        await submitLabelPayload(videoUrl, labelsFileContent, fetchMock as unknown as typeof fetch);
 
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(fetchMock).toHaveBeenCalledWith(LABEL_ANNOTATION_API_URL, {
@@ -16,7 +17,10 @@ describe("submitLabelPayload", () => {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
-            body: JSON.stringify({ labels_file_content: labelsFileContent }),
+            body: JSON.stringify({
+                video_url: videoUrl,
+                labels_file_content: labelsFileContent,
+            }),
         });
     });
 
@@ -26,7 +30,7 @@ describe("submitLabelPayload", () => {
         );
 
         await expect(
-            submitLabelPayload(labelsFileContent, fetchMock as unknown as typeof fetch)
+            submitLabelPayload(videoUrl, labelsFileContent, fetchMock as unknown as typeof fetch)
         ).rejects.toThrow("Server rejected submission (400 Bad Request): bad payload");
     });
 });

@@ -231,7 +231,7 @@ downloadBtn.addEventListener("click", async () => {
 
     setControlsEnabled(false);
     try {
-        await submitLabelPayload(labelsFileContent);
+        await submitLabelPayload(VIDEO_URL, labelsFileContent);
     } catch (err) {
         console.error("Label JSON submission failed:", err);
         const msg = err instanceof Error ? err.message : String(err);
