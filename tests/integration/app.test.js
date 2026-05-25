@@ -92,7 +92,7 @@ test.describe("Pose Zoo box-selection page", () => {
     test("shows the three box-page controls", async ({ page }) => {
         await expect(page.locator("#newFrameBtn")).toBeVisible();
         await expect(page.locator("#resetBtn")).toContainText("Reset Box");
-        await expect(page.locator("#downloadBtn")).toContainText("Download JSON");
+        await expect(page.locator("#downloadBtn")).toContainText("Submit to Server");
     });
 
     test("Reset and Download start disabled and JSON preview shows a null box", async ({

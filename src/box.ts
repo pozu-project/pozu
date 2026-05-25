@@ -13,14 +13,10 @@
  * that keeping the two boot scripts independent is simpler.
  */
 import "./styles.css";
-import {
-    loadVideoModel,
-    refreshTotalFrames,
-    VIDEO_URL,
-    type VideoModel,
-} from "./video.js";
+import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "./video.js";
 import { pickRandomFrame, type VideoMeta } from "./payload.js";
 import { buildBoxPayload, normaliseBox, clampBox, type Box } from "./box-payload.js";
+import { submitBoxPayload } from "./box-api.js";
 
 // ---- Diagnostics ----
 // Mirror main.ts so failures on the deployed preview surface in the
@@ -180,10 +176,7 @@ document.addEventListener("mousemove", (e) => {
     if (!dragStart) return;
     const p = clientToPixel(e);
     if (!p) return;
-    box = normaliseBox(
-        { x: dragStart.pixelX, y: dragStart.pixelY },
-        { x: p.pixelX, y: p.pixelY }
-    );
+    box = normaliseBox({ x: dragStart.pixelX, y: dragStart.pixelY }, { x: p.pixelX, y: p.pixelY });
     updateBoxUI();
 });
 
@@ -291,7 +284,7 @@ resetBtn.addEventListener("click", () => {
     updateBoxUI();
 });
 
-downloadBtn.addEventListener("click", () => {
+downloadBtn.addEventListener("click", async () => {
     if (!box) {
         showStatus("error", "No box drawn yet.");
         return;
@@ -302,30 +295,33 @@ downloadBtn.addEventListener("click", () => {
         return;
     }
 
+    const payload = buildBoxPayload({
+        videoUrl: VIDEO_URL,
+        frameIndex,
+        videoMeta: meta,
+        box,
+    });
+
+    setControlsEnabled(false);
     try {
-        const payload = buildBoxPayload({
-            videoUrl: VIDEO_URL,
-            frameIndex,
-            videoMeta: meta,
-            box,
-        });
-        const json = JSON.stringify(payload, null, 2);
-        const blob = new Blob([json], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `pose-zoo-box_frame-${frameIndex}_${new Date()
-            .toISOString()
-            .replace(/[:.]/g, "-")}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showStatus("success", `✅ Downloaded ${a.download}`);
+        await submitBoxPayload(payload);
     } catch (err) {
-        console.error("Box JSON export failed:", err);
+        console.error("Box JSON submission failed:", err);
         const msg = err instanceof Error ? err.message : String(err);
-        showStatus("error", `Failed to export JSON: ${msg}`);
+        showStatus("error", `Failed to submit box annotation: ${msg}`);
+        setControlsEnabled(true);
+        return;
+    }
+
+    showStatus("success", "✅ Submitted box annotation. Loading another random frame…");
+    try {
+        await loadRandomFrame();
+        showStatus("success", "✅ Submitted box annotation and loaded a new random frame.");
+    } catch (err) {
+        console.error("Loading next random frame failed after submit:", err);
+        const msg = err instanceof Error ? err.message : String(err);
+        showStatus("error", `Submitted annotation, but failed to load a new frame: ${msg}`);
+        setControlsEnabled(true);
     }
 });
 
