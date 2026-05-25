@@ -149,6 +149,10 @@ h1 {
     border: 2px solid #e94560;
 }
 
+#downloadBtn.ready {
+    border-color: #22c55e;
+}
+
 #resetBtn {
     background: #475569;
     color: white;
@@ -342,6 +346,49 @@ canvas {
     display: block;
     background: #7f1d1d;
     color: #fecaca;
+}
+
+.error-modal {
+    margin: auto;
+    max-width: 460px;
+    width: calc(100% - 32px);
+    border: 1px solid #334155;
+    border-radius: 10px;
+    background: #0b1220;
+    color: #e2e8f0;
+    padding: 18px;
+}
+
+.error-modal::backdrop {
+    background: rgba(2, 6, 23, 0.75);
+}
+
+.error-modal h2 {
+    margin-bottom: 10px;
+}
+
+.error-modal p {
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.error-modal a {
+    color: #7dd3fc;
+}
+
+.error-modal form {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.error-modal button {
+    border: none;
+    border-radius: 6px;
+    background: #0ea5e9;
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
 }
 
 .loading-fullscreen {

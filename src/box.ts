@@ -58,6 +58,8 @@ const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
 const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
+const errorModal = document.getElementById("errorModal") as HTMLDialogElement | null;
+const errorModalMessage = document.getElementById("errorModalMessage") as HTMLElement | null;
 
 setStage("Booting pozu box mode… (loading sleap-io.js bundle)");
 
@@ -117,8 +119,22 @@ function renderBoxOverlay() {
 
 function updateBoxUI() {
     renderBoxOverlay();
+    downloadBtn.classList.toggle("ready", box != null);
     resetBtn.disabled = box == null;
     downloadBtn.disabled = box == null;
+}
+
+function showIssueModal(message: string) {
+    if (!errorModal || !errorModalMessage) {
+        window.alert(
+            `We're sorry — ${message}. Please submit an issue at https://github.com/CodyCBakerPhD/pozu/issues`
+        );
+        return;
+    }
+    errorModalMessage.textContent = message;
+    if (!errorModal.open) {
+        errorModal.showModal();
+    }
 }
 
 function clientToPixel(e: MouseEvent): { pixelX: number; pixelY: number } | null {
@@ -280,19 +296,22 @@ downloadBtn.addEventListener("click", async () => {
     } catch (err) {
         console.error("Box JSON submission failed:", err);
         const msg = err instanceof Error ? err.message : String(err);
-        showStatus("error", `Failed to submit box annotation: ${msg}`);
+        showIssueModal(
+            `Something went wrong while submitting this annotation (${msg}). Please submit an issue at the GitHub issues link below.`
+        );
         setControlsEnabled(true);
         return;
     }
 
-    showStatus("success", "✅ Submitted box annotation. Loading another random frame…");
+    statusMsg.style.display = "none";
     try {
         await loadRandomFrame();
-        showStatus("success", "✅ Submitted box annotation and loaded a new random frame.");
     } catch (err) {
         console.error("Loading next random frame failed after submit:", err);
         const msg = err instanceof Error ? err.message : String(err);
-        showStatus("error", `Submitted annotation, but failed to load a new frame: ${msg}`);
+        showIssueModal(
+            `Your annotation was submitted, but loading a new frame failed (${msg}). Please submit an issue at the GitHub issues link below.`
+        );
         setControlsEnabled(true);
     }
 });

@@ -102,6 +102,25 @@ test.describe("Pozu box-selection page", () => {
         await expect(page.locator("#boxCoords")).toHaveCount(0);
     });
 
+    test("includes an error modal with GitHub issues link", async ({ page }) => {
+        await expect(page.locator("#errorModal")).toHaveCount(1);
+        const issuesLink = page.locator(
+            '#errorModal a[href="https://github.com/CodyCBakerPhD/pozu/issues"]'
+        );
+        await expect(issuesLink).toHaveAttribute(
+            "href",
+            "https://github.com/CodyCBakerPhD/pozu/issues"
+        );
+    });
+
+    test("submit button ready highlight is green", async ({ page }) => {
+        const borderColor = await page.locator("#downloadBtn").evaluate((el) => {
+            el.classList.add("ready");
+            return window.getComputedStyle(el).borderTopColor;
+        });
+        expect(borderColor).toBe("rgb(34, 197, 94)");
+    });
+
     test("Label link in the nav points back to the labeling page", async ({ page }) => {
         const labelLink = page.locator('a.top-nav-link[href$="index.html"]', { hasText: "Label" });
         await expect(labelLink).toBeVisible();

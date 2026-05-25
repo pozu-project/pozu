@@ -55,6 +55,24 @@
                 </div>
             </section>
 
+            <dialog id="errorModal" class="error-modal" aria-labelledby="errorModalTitle">
+                <h2 id="errorModalTitle">We&rsquo;re sorry</h2>
+                <p id="errorModalMessage">
+                    Something went wrong. Please submit an issue at the GitHub issues link.
+                </p>
+                <p>
+                    <a
+                        href="https://github.com/CodyCBakerPhD/pozu/issues"
+                        target="_blank"
+                        rel="noopener"
+                        >Open GitHub issues</a
+                    >
+                </p>
+                <form method="dialog">
+                    <button id="errorModalCloseBtn">Close</button>
+                </form>
+            </dialog>
+
             <p class="subtitle page-credit">
                 Powered by
                 <a href="https://github.com/talmolab/sleap-io.js" target="_blank" rel="noopener"
