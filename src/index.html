@@ -19,6 +19,7 @@
                     </button>
                     <button class="top-nav-link" data-view-mode="track" type="button">Track</button>
                     <a class="top-nav-link" href="./box.html">Box</a>
+                    <button class="top-nav-link" data-view-mode="focus" type="button">Focus</button>
                     <button class="top-nav-link active" data-view-mode="label" type="button">
                         Label
                     </button>
@@ -28,8 +29,11 @@
 
         <main class="view-shell">
             <section id="labelView">
-                <p class="instructions">
+                <p class="instructions" id="labelInstructions">
                     Click a label on the right to select it, then click the frame to place a point.
+                </p>
+                <p class="instructions" id="focusInstructions" hidden>
+                    Select a keypoint below, then click once on the frame to place it and auto-advance.
                 </p>
                 <div class="controls">
                     <button id="resetBtn" disabled>🔄 Reset Labels</button>
@@ -52,8 +56,17 @@
                     </div>
 
                     <div class="sidebar">
-                        <h2>🏷️ Skeleton</h2>
-                        <div class="label-palette" id="labelPalette"></div>
+                        <div id="labelSidebarContent">
+                            <h2>🏷️ Skeleton</h2>
+                            <div class="label-palette" id="labelPalette"></div>
+                        </div>
+
+                        <div id="focusSidebarContent" hidden>
+                            <h2>🎯 Focus Mode</h2>
+                            <p class="sidebar-hint">Select the keypoint to label:</p>
+                            <div class="focus-keypoint-picker" id="focusKeypointPicker"></div>
+                            <div class="focus-count" id="focusCount">Frames labeled: 0</div>
+                        </div>
 
                         <div id="statusMsg"></div>
                     </div>
