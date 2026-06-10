@@ -4,9 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Pozu</title>
-      <script type="module" crossorigin src="./assets/index-DAMlA35U.js"></script>
-      <link rel="modulepreload" crossorigin href="./assets/payload-CoPeGZgI.js">
-      <link rel="stylesheet" crossorigin href="./assets/payload-BP-v_8RX.css">
+      <script type="module" crossorigin src="./assets/index-6uiyADsI.js"></script>
+      <link rel="modulepreload" crossorigin href="./assets/payload-Bnk8angW.js">
+      <link rel="stylesheet" crossorigin href="./assets/payload-ClBC6roA.css">
     </head>
     <body>
         <header class="top-nav">
@@ -21,6 +21,7 @@
                     </button>
                     <button class="top-nav-link" data-view-mode="track" type="button">Track</button>
                     <a class="top-nav-link" href="./box.html">Box</a>
+                    <button class="top-nav-link" data-view-mode="focus" type="button">Focus</button>
                     <button class="top-nav-link active" data-view-mode="label" type="button">
                         Label
                     </button>
@@ -30,8 +31,11 @@
 
         <main class="view-shell">
             <section id="labelView">
-                <p class="instructions">
+                <p class="instructions" id="labelInstructions">
                     Click a label on the right to select it, then click the frame to place a point.
+                </p>
+                <p class="instructions" id="focusInstructions" hidden>
+                    Select a keypoint below, then click once on the frame to place it and auto-advance.
                 </p>
                 <div class="controls">
                     <button id="resetBtn" disabled>🔄 Reset Labels</button>
@@ -54,8 +58,19 @@
                     </div>
 
                     <div class="sidebar">
-                        <h2>🏷️ Skeleton</h2>
-                        <div class="label-palette" id="labelPalette"></div>
+                        <div id="labelSidebarContent">
+                            <h2>🏷️ Skeleton</h2>
+                            <div class="label-palette" id="labelPalette"></div>
+                        </div>
+
+                        <div id="focusSidebarContent" hidden>
+                            <h2>🎯 Focus Mode</h2>
+                            <label class="sidebar-hint" for="focusKeypointSelect"
+                                >Keypoint to label (one at a time):</label
+                            >
+                            <select class="focus-keypoint-select" id="focusKeypointSelect"></select>
+                            <div class="focus-count" id="focusCount">Frames labeled: 0</div>
+                        </div>
 
                         <div id="statusMsg"></div>
                     </div>
