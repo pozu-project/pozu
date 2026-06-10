@@ -15,18 +15,16 @@
  *
  * Interactions:
  *  - Mouse wheel over the frame zooms toward the cursor.
- *  - `+` / `-` / reset buttons (wired by the caller) and the `+`, `-`,
- *    `0` keys zoom toward the frame centre.
+ *  - A caller-wired slider (via {@link ZoomController.setScale}), the
+ *    reset button, and the `+`, `-`, `0` keys zoom toward the frame centre.
  *  - Panning: drag while "pan mode" is on (a caller-toggled tool, see
  *    {@link ZoomController.setPanMode}), or — as always-available
  *    shortcuts — middle-mouse drag or hold <kbd>Space</kbd> and drag.
  */
 
 export interface ZoomController {
-    /** Zoom in one step toward the frame centre. */
-    zoomIn(): void;
-    /** Zoom out one step toward the frame centre. */
-    zoomOut(): void;
+    /** Zoom to an absolute scale, keeping the frame centre fixed. */
+    setScale(next: number): void;
     /**
      * Toggle "pan mode": while on, a left-drag on the frame pans instead
      * of placing a label / drawing a box. Middle-mouse and Space+drag pan
@@ -223,8 +221,7 @@ export function createZoomController(opts: ZoomOptions): ZoomController {
     apply();
 
     return {
-        zoomIn: () => zoomCentered(scale * step),
-        zoomOut: () => zoomCentered(scale / step),
+        setScale: zoomCentered,
         setPanMode,
         reset,
         getScale: () => scale,

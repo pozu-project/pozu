@@ -44,8 +44,7 @@ const canvas = document.getElementById("frameCanvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 const canvasContainer = document.getElementById("canvasContainer") as HTMLElement;
 const canvasViewport = document.getElementById("canvasViewport") as HTMLElement;
-const zoomInBtn = document.getElementById("zoomInBtn") as HTMLButtonElement;
-const zoomOutBtn = document.getElementById("zoomOutBtn") as HTMLButtonElement;
+const zoomSlider = document.getElementById("zoomSlider") as HTMLInputElement;
 const zoomResetBtn = document.getElementById("zoomResetBtn") as HTMLButtonElement;
 const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
@@ -107,6 +106,7 @@ const zoom = createZoomController({
     content: canvasContainer,
     onChange: (scale) => {
         zoomLevel.textContent = `${Math.round(scale * 100)}%`;
+        zoomSlider.value = String(scale);
         // Pan / reset only do something while zoomed in.
         const zoomed = scale > 1;
         zoomResetBtn.disabled = !zoomed;
@@ -124,8 +124,7 @@ function setPanMode(on: boolean) {
     panToggleBtn.setAttribute("aria-pressed", String(on));
 }
 
-zoomInBtn.addEventListener("click", () => zoom.zoomIn());
-zoomOutBtn.addEventListener("click", () => zoom.zoomOut());
+zoomSlider.addEventListener("input", () => zoom.setScale(parseFloat(zoomSlider.value)));
 zoomResetBtn.addEventListener("click", () => zoom.reset());
 panToggleBtn.addEventListener("click", () =>
     setPanMode(!panToggleBtn.classList.contains("active"))
@@ -232,8 +231,7 @@ async function showFrame(idx: number) {
     canvasContainer.style.display = "inline-block";
     initialLoading.style.display = "none";
     zoom.reset();
-    zoomInBtn.disabled = false;
-    zoomOutBtn.disabled = false;
+    zoomSlider.disabled = false;
 
     frameInfo.textContent =
         `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;

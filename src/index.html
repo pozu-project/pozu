@@ -38,24 +38,48 @@
                 </p>
                 <div class="controls">
                     <button id="resetBtn" disabled>🔄 Reset Labels</button>
-                    <div class="zoom-controls" role="group" aria-label="Zoom frame">
-                        <button id="zoomOutBtn" type="button" title="Zoom out (−)" disabled>
-                            −
-                        </button>
-                        <button id="zoomInBtn" type="button" title="Zoom in (+)" disabled>+</button>
-                        <button id="zoomResetBtn" type="button" title="Reset zoom (0)" disabled>
-                            ⤢ Fit
-                        </button>
-                        <button
-                            id="panToggleBtn"
-                            type="button"
-                            title="Pan mode — drag to move the frame"
-                            aria-pressed="false"
-                            disabled
+                    <button
+                        id="panToggleBtn"
+                        class="tool-toggle"
+                        type="button"
+                        title="Toggle pan mode — drag to move the frame"
+                        aria-pressed="false"
+                        disabled
+                    >
+                        <svg
+                            class="tool-icon icon-select"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-dasharray="3 3"
+                            aria-hidden="true"
                         >
-                            ✋ Pan
-                        </button>
-                    </div>
+                            <rect x="3" y="3" width="18" height="18" rx="1" />
+                        </svg>
+                        <svg
+                            class="tool-icon icon-pan"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <line x1="12" y1="3" x2="12" y2="21" />
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <polyline points="9 6 12 3 15 6" />
+                            <polyline points="9 18 12 21 15 18" />
+                            <polyline points="6 9 3 12 6 15" />
+                            <polyline points="18 9 21 12 18 15" />
+                        </svg>
+                    </button>
                 </div>
 
                 <div class="main-container">
@@ -70,7 +94,30 @@
                                     <canvas id="frameCanvas"></canvas>
                                 </div>
                             </div>
-                            <span id="zoomLevel" class="zoom-readout">100%</span>
+                            <div class="zoom-rail">
+                                <span id="zoomLevel" class="zoom-readout">100%</span>
+                                <input
+                                    id="zoomSlider"
+                                    class="zoom-slider"
+                                    type="range"
+                                    min="1"
+                                    max="8"
+                                    step="0.05"
+                                    value="1"
+                                    orient="vertical"
+                                    aria-label="Zoom level"
+                                    disabled
+                                />
+                                <button
+                                    id="zoomResetBtn"
+                                    class="zoom-fit"
+                                    type="button"
+                                    title="Reset zoom (0)"
+                                    disabled
+                                >
+                                    ⤢
+                                </button>
+                            </div>
                         </div>
                         <div class="loading-fullscreen" id="initialLoading">
                             <div class="spinner"></div>
