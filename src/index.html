@@ -33,16 +33,33 @@
                     Click a label on the right to select it, then click the frame to place a point.
                 </p>
                 <p class="instructions" id="focusInstructions" hidden>
-                    Select a keypoint below, then click once on the frame to place it and auto-advance.
+                    Select a keypoint below, then click once on the frame to place it and
+                    auto-advance.
                 </p>
                 <div class="controls">
                     <button id="resetBtn" disabled>🔄 Reset Labels</button>
+                    <div class="zoom-controls" role="group" aria-label="Zoom frame">
+                        <button id="zoomOutBtn" type="button" title="Zoom out (−)" disabled>
+                            −
+                        </button>
+                        <span id="zoomLevel" class="zoom-level">100%</span>
+                        <button id="zoomInBtn" type="button" title="Zoom in (+)" disabled>+</button>
+                        <button id="zoomResetBtn" type="button" title="Reset zoom (0)" disabled>
+                            ⤢ Fit
+                        </button>
+                    </div>
                 </div>
 
                 <div class="main-container">
                     <div>
-                        <div class="canvas-container" id="canvasContainer" style="display: none">
-                            <canvas id="frameCanvas"></canvas>
+                        <div class="canvas-viewport" id="canvasViewport">
+                            <div
+                                class="canvas-container"
+                                id="canvasContainer"
+                                style="display: none"
+                            >
+                                <canvas id="frameCanvas"></canvas>
+                            </div>
                         </div>
                         <div class="loading-fullscreen" id="initialLoading">
                             <div class="spinner"></div>
@@ -80,11 +97,17 @@
                 <p>Coming soon…</p>
                 <div id="binaryDemo" class="binary-demo" hidden>
                     <figure>
-                        <img src="./binary-demo-good.png" alt="Example of a good pose estimation, accepted as Good" />
+                        <img
+                            src="./binary-demo-good.png"
+                            alt="Example of a good pose estimation, accepted as Good"
+                        />
                         <figcaption>Good</figcaption>
                     </figure>
                     <figure>
-                        <img src="./binary-demo-bad.png" alt="Example of a bad pose estimation, rejected as Bad" />
+                        <img
+                            src="./binary-demo-bad.png"
+                            alt="Example of a bad pose estimation, rejected as Bad"
+                        />
                         <figcaption>Bad</figcaption>
                     </figure>
                 </div>

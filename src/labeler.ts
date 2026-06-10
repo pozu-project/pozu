@@ -84,16 +84,35 @@ export function createLabeler(opts: LabelerOptions): Labeler {
     }
 
     // ---- Pixel <-> display mapping ----
+    // Display (dot) coordinates live in the canvas-container's *local*,
+    // untransformed space, so they are derived from the pixel position via
+    // `clientWidth` (which ignores any zoom transform) rather than from the
+    // raw on-screen offset. This keeps dots glued to the frame while the
+    // container is scaled by the zoom controller.
+    function pixelToDisplay(pixelX: number, pixelY: number, meta: VideoMeta) {
+        return {
+            displayX: pixelX * (opts.canvas.clientWidth / meta.width),
+            displayY: pixelY * (opts.canvas.clientHeight / meta.height),
+        };
+    }
+
     function clientToPixel(e: MouseEvent) {
         const meta = opts.getVideoMeta();
         if (!meta) return null;
+        // `getBoundingClientRect()` reflects the zoom transform, so the
+        // pixel mapping stays correct at any zoom level / pan offset.
         const rect = opts.canvas.getBoundingClientRect();
-        const displayX = e.clientX - rect.left;
-        const displayY = e.clientY - rect.top;
         const scaleX = meta.width / rect.width;
         const scaleY = meta.height / rect.height;
-        const pixelX = Math.max(0, Math.min(meta.width - 1, Math.round(displayX * scaleX)));
-        const pixelY = Math.max(0, Math.min(meta.height - 1, Math.round(displayY * scaleY)));
+        const pixelX = Math.max(
+            0,
+            Math.min(meta.width - 1, Math.round((e.clientX - rect.left) * scaleX))
+        );
+        const pixelY = Math.max(
+            0,
+            Math.min(meta.height - 1, Math.round((e.clientY - rect.top) * scaleY))
+        );
+        const { displayX, displayY } = pixelToDisplay(pixelX, pixelY, meta);
         return { pixelX, pixelY, displayX, displayY };
     }
 

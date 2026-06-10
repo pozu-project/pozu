@@ -4,6 +4,7 @@
  */
 import "./styles.css";
 import { createLabeler } from "./labeler.js";
+import { createZoomController } from "./zoom.js";
 import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "./video.js";
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
@@ -42,6 +43,11 @@ console.info("[pozu] main.ts module evaluating");
 const canvas = document.getElementById("frameCanvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 const canvasContainer = document.getElementById("canvasContainer") as HTMLElement;
+const canvasViewport = document.getElementById("canvasViewport") as HTMLElement;
+const zoomInBtn = document.getElementById("zoomInBtn") as HTMLButtonElement;
+const zoomOutBtn = document.getElementById("zoomOutBtn") as HTMLButtonElement;
+const zoomResetBtn = document.getElementById("zoomResetBtn") as HTMLButtonElement;
+const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
 const labelPalette = document.getElementById("labelPalette") as HTMLElement;
 const frameInfo = document.getElementById("frameInfo") as HTMLElement;
@@ -93,6 +99,19 @@ const labeler = createLabeler({
     getDisplayScale: () => displayScale,
     getVideoMeta,
 });
+
+// ---- Zoom / pan ----
+const zoom = createZoomController({
+    viewport: canvasViewport,
+    content: canvasContainer,
+    onChange: (scale) => {
+        zoomLevel.textContent = `${Math.round(scale * 100)}%`;
+        zoomResetBtn.disabled = scale === 1;
+    },
+});
+zoomInBtn.addEventListener("click", () => zoom.zoomIn());
+zoomOutBtn.addEventListener("click", () => zoom.zoomOut());
+zoomResetBtn.addEventListener("click", () => zoom.reset());
 
 function updateSubmitReadyState() {
     downloadBtn.classList.toggle("ready", labeler.placed.size === LABEL_DEFINITIONS.length);
@@ -194,6 +213,9 @@ async function showFrame(idx: number) {
     labeler.clearAll();
     canvasContainer.style.display = "inline-block";
     initialLoading.style.display = "none";
+    zoom.reset();
+    zoomInBtn.disabled = false;
+    zoomOutBtn.disabled = false;
 
     frameInfo.textContent =
         `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;

@@ -210,6 +210,23 @@ h1 {
     flex-wrap: wrap;
 }
 
+.canvas-viewport {
+    display: inline-block;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 8px;
+    line-height: 0;
+    touch-action: none;
+}
+
+.canvas-viewport.pan-ready {
+    cursor: grab;
+}
+
+.canvas-viewport.panning {
+    cursor: grabbing;
+}
+
 .canvas-container {
     position: relative;
     border: 2px solid #334155;
@@ -218,6 +235,55 @@ h1 {
     background: #000;
     cursor: crosshair;
     line-height: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.canvas-viewport.pan-ready .canvas-container,
+.canvas-viewport.panning .canvas-container {
+    cursor: inherit;
+}
+
+.zoom-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    background: #0b1220;
+    border-radius: 6px;
+}
+
+.zoom-controls button {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    background: #475569;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        transform 0.1s,
+        box-shadow 0.2s;
+}
+
+.zoom-controls button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.zoom-level {
+    min-width: 3.4em;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #cbd5e1;
 }
 
 canvas {

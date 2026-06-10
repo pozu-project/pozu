@@ -32,18 +32,34 @@
                 <div class="controls">
                     <span class="frame-info" id="frameInfo">Loading…</span>
                     <button id="resetBtn" disabled>🔄 Reset Box</button>
+                    <div class="zoom-controls" role="group" aria-label="Zoom frame">
+                        <button id="zoomOutBtn" type="button" title="Zoom out (−)" disabled>
+                            −
+                        </button>
+                        <span id="zoomLevel" class="zoom-level">100%</span>
+                        <button id="zoomInBtn" type="button" title="Zoom in (+)" disabled>+</button>
+                        <button id="zoomResetBtn" type="button" title="Reset zoom (0)" disabled>
+                            ⤢ Fit
+                        </button>
+                    </div>
                 </div>
 
                 <div class="main-container">
                     <div>
-                        <div class="canvas-container" id="canvasContainer" style="display: none">
-                            <canvas id="frameCanvas"></canvas>
+                        <div class="canvas-viewport" id="canvasViewport">
                             <div
-                                class="box-overlay"
-                                id="boxOverlay"
+                                class="canvas-container"
+                                id="canvasContainer"
                                 style="display: none"
-                                aria-hidden="true"
-                            ></div>
+                            >
+                                <canvas id="frameCanvas"></canvas>
+                                <div
+                                    class="box-overlay"
+                                    id="boxOverlay"
+                                    style="display: none"
+                                    aria-hidden="true"
+                                ></div>
+                            </div>
                         </div>
                         <div class="loading-fullscreen" id="initialLoading">
                             <div class="spinner"></div>
