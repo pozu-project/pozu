@@ -18,6 +18,8 @@ export async function submitLabelPayload(
 
     if (response.ok) return;
 
+    console.error("[pozu] label submission payload:", JSON.stringify(payload, null, 2));
+
     const detail = (await response.text()).trim();
     throw new Error(
         detail
