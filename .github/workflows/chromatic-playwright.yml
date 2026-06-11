@@ -1,0 +1,69 @@
+name: Chromatic (Playwright)
+
+on:
+    workflow_dispatch:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    chromatic-playwright:
+        name: Run Chromatic (Playwright)
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Detect Chromatic Playwright prerequisites
+              id: detect
+              env:
+                  CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN }}
+              run: |
+                  HAS_PLAYWRIGHT=false
+                  if [ -f "configs/playwright.config.js" ]; then
+                    HAS_PLAYWRIGHT=true
+                  elif node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts['test:e2e'] ? 0 : 1)"; then
+                    HAS_PLAYWRIGHT=true
+                  fi
+
+                  HAS_TOKEN=false
+                  if [ -n "${CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN}" ]; then
+                    HAS_TOKEN=true
+                  fi
+
+                  echo "has_playwright=${HAS_PLAYWRIGHT}" >> "${GITHUB_OUTPUT}"
+                  echo "has_token=${HAS_TOKEN}" >> "${GITHUB_OUTPUT}"
+
+            - name: Fail when Playwright or token is missing
+              if: ${{ steps.detect.outputs.has_playwright != 'true' || steps.detect.outputs.has_token != 'true' }}
+              run: |
+                  echo "Chromatic Playwright requires Playwright setup and CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN secret."
+                  exit 1
+
+            - name: Set up Node.js
+              if: ${{ steps.detect.outputs.has_playwright == 'true' && steps.detect.outputs.has_token == 'true' }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: npm
+
+            - name: Install dependencies
+              if: ${{ steps.detect.outputs.has_playwright == 'true' && steps.detect.outputs.has_token == 'true' }}
+              run: npm ci
+
+            - name: Install Playwright Browsers
+              if: ${{ steps.detect.outputs.has_playwright == 'true' && steps.detect.outputs.has_token == 'true' }}
+              run: npx playwright install --with-deps chromium
+
+            - name: Run Playwright tests
+              if: ${{ steps.detect.outputs.has_playwright == 'true' && steps.detect.outputs.has_token == 'true' }}
+              run: npm run test:e2e
+
+            - name: Run Chromatic (Playwright)
+              if: ${{ steps.detect.outputs.has_playwright == 'true' && steps.detect.outputs.has_token == 'true' }}
+              uses: chromaui/action@latest
+              with:
+                  projectToken: ${{ secrets.CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN }}
+                  playwright: true

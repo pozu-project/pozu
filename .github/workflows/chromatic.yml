@@ -19,7 +19,7 @@ jobs:
             - name: Detect Chromatic prerequisites
               id: detect
               env:
-                  CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+                  CHROMATIC_STORYBOOK_PROJECT_TOKEN: ${{ secrets.CHROMATIC_STORYBOOK_PROJECT_TOKEN }}
               run: |
                   HAS_STORYBOOK=false
                   if [ -d ".storybook" ]; then
@@ -29,7 +29,7 @@ jobs:
                   fi
 
                   HAS_TOKEN=false
-                  if [ -n "${CHROMATIC_PROJECT_TOKEN}" ]; then
+                  if [ -n "${CHROMATIC_STORYBOOK_PROJECT_TOKEN}" ]; then
                     HAS_TOKEN=true
                   fi
 
@@ -39,7 +39,7 @@ jobs:
             - name: Fail when Storybook or token is missing
               if: ${{ steps.detect.outputs.has_storybook != 'true' || steps.detect.outputs.has_token != 'true' }}
               run: |
-                  echo "Chromatic requires Storybook setup and CHROMATIC_PROJECT_TOKEN secret."
+                  echo "Chromatic requires Storybook setup and CHROMATIC_STORYBOOK_PROJECT_TOKEN secret."
                   exit 1
 
             - name: Set up Node.js
@@ -57,5 +57,5 @@ jobs:
               if: ${{ steps.detect.outputs.has_storybook == 'true' && steps.detect.outputs.has_token == 'true' }}
               uses: chromaui/action@latest
               with:
-                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+                  projectToken: ${{ secrets.CHROMATIC_STORYBOOK_PROJECT_TOKEN }}
                   onlyChanged: true
