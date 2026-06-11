@@ -1,0 +1,46 @@
+name: Chromatic (Playwright)
+
+on:
+    workflow_dispatch:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    chromatic-playwright:
+        name: Run Chromatic (Playwright)
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps chromium
+
+            - name: Run Playwright tests
+              env:
+                  CHROMATIC_ARCHIVE_LOCATION: test-results
+              run: |
+                  rm -rf test-results/chromatic-archives
+                  npm run test:e2e -- --retries=0
+
+            - name: Run Chromatic (Playwright)
+              uses: chromaui/action@latest
+              env:
+                  CHROMATIC_ARCHIVE_LOCATION: test-results
+              with:
+                  projectToken: ${{ secrets.CHROMATIC_PLAYWRIGHT_PROJECT_TOKEN }}
+                  playwright: true
