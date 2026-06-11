@@ -4,9 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Pozu</title>
-      <script type="module" crossorigin src="./assets/index-DkJkG0Db.js"></script>
-      <link rel="modulepreload" crossorigin href="./assets/payload-qKadDRWz.js">
-      <link rel="stylesheet" crossorigin href="./assets/payload-cdYUfhip.css">
+      <script type="module" crossorigin src="./assets/index-CsOsK4Px.js"></script>
+      <link rel="modulepreload" crossorigin href="./assets/payload-CqNjx-sh.js">
+      <link rel="stylesheet" crossorigin href="./assets/payload-Bg1GwB_h.css">
     </head>
     <body>
         <header class="top-nav">
@@ -16,15 +16,40 @@
                     <span>Pozu</span>
                 </a>
                 <nav class="top-nav-links" aria-label="View modes">
-                    <button class="top-nav-link" data-view-mode="binary" type="button">
-                        Binary
-                    </button>
-                    <button class="top-nav-link" data-view-mode="track" type="button">Track</button>
-                    <a class="top-nav-link" href="./box.html">Box</a>
-                    <button class="top-nav-link" data-view-mode="focus" type="button">Focus</button>
-                    <button class="top-nav-link active" data-view-mode="label" type="button">
-                        Label
-                    </button>
+                    <div class="nav-section nav-section--label">
+                        <span class="nav-section-title">Label</span>
+                        <div class="nav-section-tabs">
+                            <button class="top-nav-link" data-view-mode="focus" type="button">
+                                Focus
+                            </button>
+                            <button
+                                class="top-nav-link active"
+                                data-view-mode="label"
+                                type="button"
+                            >
+                                Full Skeleton
+                            </button>
+                            <a class="top-nav-link" href="./box.html">Box</a>
+                        </div>
+                    </div>
+                    <div class="nav-section nav-section--train">
+                        <span class="nav-section-title">Train</span>
+                        <div class="nav-section-tabs">
+                            <button class="top-nav-link" type="button" disabled>Models</button>
+                            <button class="top-nav-link" type="button" disabled>Inference</button>
+                        </div>
+                    </div>
+                    <div class="nav-section nav-section--curate">
+                        <span class="nav-section-title">Curate</span>
+                        <div class="nav-section-tabs">
+                            <button class="top-nav-link" data-view-mode="binary" type="button">
+                                Binary
+                            </button>
+                            <button class="top-nav-link" data-view-mode="track" type="button">
+                                Track
+                            </button>
+                        </div>
+                    </div>
                 </nav>
             </div>
         </header>
