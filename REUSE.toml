@@ -1,0 +1,10 @@
+version = 1
+
+SPDX-PackageName = "pozu"
+SPDX-PackageDownloadLocation = "https://github.com/CodyCBakerPhD/pozu"
+
+[[annotations]]
+path = ["**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Cody C. Baker"
+SPDX-License-Identifier = "MIT"
