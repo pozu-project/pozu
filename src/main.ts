@@ -283,15 +283,27 @@ async function loadRandomFrame() {
         return;
     }
 
-    // Use the background-decoded frame if one is ready; otherwise decode a
-    // freshly-picked random frame inline.
+    // Resolve the next frame, preferring the background-decoded one. A
+    // single seek can fail or time out — deep seeks into the remote MP4 are
+    // flaky — so fall back to freshly-picked frames instead of dead-ending
+    // on "no data" for one unlucky index.
+    let idx = -1;
+    let bitmap: ImageBitmap | null = null;
     if (prefetched) {
-        const { idx, promise } = prefetched;
+        ({ idx } = prefetched);
+        const { promise } = prefetched;
         prefetched = null;
-        await showFrame(idx, promise);
-        return;
+        bitmap = await promise;
     }
-    await showFrame(pickRandomFrame(total, frameIndex));
+    for (let tries = 0; bitmap == null && tries < 4; tries++) {
+        idx = pickRandomFrame(total, frameIndex);
+        try {
+            bitmap = await videoModel.video.getFrame(idx);
+        } catch (err) {
+            console.warn(`[pozu] decode of frame ${idx} failed; retrying:`, err);
+        }
+    }
+    await showFrame(idx, Promise.resolve(bitmap));
 }
 
 async function ensureVideoModel() {
