@@ -4,6 +4,7 @@
  */
 import "./styles.css";
 import { createLabeler } from "./labeler.js";
+import { createZoomController } from "./zoom.js";
 import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "./video.js";
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
@@ -42,6 +43,11 @@ console.info("[pozu] main.ts module evaluating");
 const canvas = document.getElementById("frameCanvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 const canvasContainer = document.getElementById("canvasContainer") as HTMLElement;
+const canvasViewport = document.getElementById("canvasViewport") as HTMLElement;
+const zoomSlider = document.getElementById("zoomSlider") as HTMLInputElement;
+const zoomResetBtn = document.getElementById("zoomResetBtn") as HTMLButtonElement;
+const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
+const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
 const labelPalette = document.getElementById("labelPalette") as HTMLElement;
 const frameInfo = document.getElementById("frameInfo") as HTMLElement;
@@ -93,6 +99,36 @@ const labeler = createLabeler({
     getDisplayScale: () => displayScale,
     getVideoMeta,
 });
+
+// ---- Zoom / pan ----
+const zoom = createZoomController({
+    viewport: canvasViewport,
+    content: canvasContainer,
+    onChange: (scale) => {
+        zoomLevel.textContent = `${Math.round(scale * 100)}%`;
+        zoomSlider.value = String(scale);
+        // Pan / reset only do something while zoomed in.
+        const zoomed = scale > 1;
+        zoomResetBtn.disabled = !zoomed;
+        panToggleBtn.disabled = !zoomed;
+        // Leaving zoom turns the pan tool back off. Guarded on the active
+        // class so the initial onChange (before `zoom` is assigned) is a
+        // no-op rather than touching the controller.
+        if (!zoomed && panToggleBtn.classList.contains("active")) setPanMode(false);
+    },
+});
+
+function setPanMode(on: boolean) {
+    zoom.setPanMode(on);
+    panToggleBtn.classList.toggle("active", on);
+    panToggleBtn.setAttribute("aria-pressed", String(on));
+}
+
+zoomSlider.addEventListener("input", () => zoom.setScale(parseFloat(zoomSlider.value)));
+zoomResetBtn.addEventListener("click", () => zoom.reset());
+panToggleBtn.addEventListener("click", () =>
+    setPanMode(!panToggleBtn.classList.contains("active"))
+);
 
 function updateSubmitReadyState() {
     downloadBtn.classList.toggle("ready", labeler.placed.size === LABEL_DEFINITIONS.length);
@@ -194,6 +230,8 @@ async function showFrame(idx: number) {
     labeler.clearAll();
     canvasContainer.style.display = "inline-block";
     initialLoading.style.display = "none";
+    zoom.reset();
+    zoomSlider.disabled = false;
 
     frameInfo.textContent =
         `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;

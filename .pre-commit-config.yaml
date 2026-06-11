@@ -16,5 +16,5 @@ repos:
       rev: v2.4.2
       hooks:
           - id: codespell
-            args: ["--ignore-words-list=pixelx"]
+            args: ["--ignore-words-list=pixelx,localy"]
             exclude: ^package-lock\.json$

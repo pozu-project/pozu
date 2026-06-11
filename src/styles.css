@@ -210,6 +210,23 @@ h1 {
     flex-wrap: wrap;
 }
 
+.canvas-viewport {
+    display: inline-block;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 8px;
+    line-height: 0;
+    touch-action: none;
+}
+
+.canvas-viewport.pan-ready {
+    cursor: grab;
+}
+
+.canvas-viewport.panning {
+    cursor: grabbing;
+}
+
 .canvas-container {
     position: relative;
     border: 2px solid #334155;
@@ -218,6 +235,111 @@ h1 {
     background: #000;
     cursor: crosshair;
     line-height: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.canvas-viewport.pan-ready .canvas-container,
+.canvas-viewport.panning .canvas-container {
+    cursor: inherit;
+}
+
+/* Pan/select tool toggle: shows the dotted-rectangle (select) icon when
+   off and the four-arrow move icon when active. */
+.tool-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background: #475569;
+    color: #fff;
+}
+
+.tool-toggle.active {
+    background: #0ea5e9;
+}
+
+.tool-icon {
+    display: block;
+}
+
+.tool-toggle .icon-pan {
+    display: none;
+}
+
+.tool-toggle.active .icon-pan {
+    display: block;
+}
+
+.tool-toggle.active .icon-select {
+    display: none;
+}
+
+.frame-row {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+}
+
+/* Vertical zoom control to the right of the frame. */
+.zoom-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 6px;
+    background: #0b1220;
+    border-radius: 6px;
+}
+
+.zoom-readout {
+    min-width: 3.6em;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #cbd5e1;
+}
+
+.zoom-slider {
+    /* Vertical range: low at the bottom, high at the top. */
+    writing-mode: vertical-lr;
+    direction: rtl;
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    width: 20px;
+    flex: 1 1 auto;
+    min-height: 160px;
+    accent-color: #0ea5e9;
+    cursor: pointer;
+}
+
+.zoom-slider:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.zoom-fit {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background: #475569;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        transform 0.1s,
+        box-shadow 0.2s;
+}
+
+.zoom-fit:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-fit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 canvas {
