@@ -27,8 +27,8 @@ import type { VideoMeta } from "./payload.js";
 
 /** The same EMBER-hosted clip used by the original `pozoo` project. */
 export const VIDEO_URL =
-    "https://ember-open-data.s3.amazonaws.com/blobs/59e/7d8/" +
-    "59e7d85b-6827-4e62-977a-bab97c54df82";
+    "https://ember-open-data.s3.amazonaws.com/blobs/b28/71c/" +
+    "b2871cfe-b785-41cf-9a72-4a94a625fd26";
 
 /** Default FPS assumed for frame-index ↔ time conversion (mirrors `pozoo`). */
 export const DEFAULT_FPS = 30;
