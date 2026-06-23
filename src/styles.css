@@ -31,31 +31,35 @@ body {
     justify-content: flex-start;
 }
 
-.top-nav-con {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    opacity: 0.75;
-    transition: opacity 0.15s;
-}
-
-.top-nav-con:hover {
-    opacity: 1;
-}
-
-.top-nav-con-logo {
-    height: 36px;
-    width: auto;
-    object-fit: contain;
-}
-
 .top-nav-github {
+    margin-left: auto;
     display: inline-flex;
     align-items: center;
     color: #94a3b8;
     text-decoration: none;
     transition: color 0.15s;
+}
+
+.con-badge {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+    z-index: 100;
+}
+
+.con-badge:hover {
+    opacity: 1;
+}
+
+.con-badge-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
 }
 
 .top-nav-github:hover {

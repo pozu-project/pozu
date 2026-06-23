@@ -32,11 +32,11 @@ test.describe("Pozu labeling page", () => {
         expect(response.headers()["content-type"]).toContain("image/svg+xml");
     });
 
-    test("shows CON branding in the nav", async ({ page }) => {
-        const conLink = page.locator(".top-nav-con");
+    test("shows CON branding badge", async ({ page }) => {
+        const conLink = page.locator(".con-badge");
         await expect(conLink).toBeVisible();
         await expect(conLink).toHaveAttribute("href", "https://centerforopenneuroscience.org");
-        await expect(page.locator(".top-nav-con .top-nav-con-logo")).toHaveAttribute(
+        await expect(page.locator(".con-badge .con-badge-logo")).toHaveAttribute(
             "src",
             /\/assets\/con-logo\.svg$/
         );
