@@ -32,3 +32,4 @@ jobs:
               with:
                   projectToken: ${{ secrets.CHROMATIC_STORYBOOK_PROJECT_TOKEN }}
                   onlyChanged: true
+                  autoAcceptChanges: main
