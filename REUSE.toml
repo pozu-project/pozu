@@ -8,9 +8,3 @@ path = ["**"]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Cody C. Baker"
 SPDX-License-Identifier = "MIT"
-
-[[annotations]]
-path = ["src/assets/con-logo.svg"]
-precedence = "override"
-SPDX-FileCopyrightText = "Center for Open Neuroscience"
-SPDX-License-Identifier = "LicenseRef-scancode-public-domain"
