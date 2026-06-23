@@ -12,7 +12,7 @@ test.describe("Pozu labeling page", () => {
         await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
         await expect(page.locator(".top-nav-brand .top-nav-logo")).toHaveAttribute(
             "src",
-            /\/pozu-logo\.svg$/
+            /\/assets\/pozu-logo\.svg$/
         );
         await expect(page.locator(".top-nav-brand")).not.toContainText("🦓");
         await expect(page.locator(".page-credit")).toContainText("sleap-io.js");
@@ -27,7 +27,7 @@ test.describe("Pozu labeling page", () => {
     });
 
     test("serves the nav logo asset", async ({ page }) => {
-        const response = await page.request.get("/pozu-logo.svg");
+        const response = await page.request.get("/assets/pozu-logo.svg");
         expect(response.ok()).toBe(true);
         expect(response.headers()["content-type"]).toContain("image/svg+xml");
     });
@@ -127,7 +127,7 @@ test.describe("Pozu box-selection page", () => {
         await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
         await expect(page.locator(".top-nav-brand .top-nav-logo")).toHaveAttribute(
             "src",
-            /\/pozu-logo\.svg$/
+            /\/assets\/pozu-logo\.svg$/
         );
         const boxLink = page.locator('a.top-nav-link[href*="box.html"]');
         await expect(boxLink).toHaveClass(/active/);

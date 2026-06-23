@@ -6,7 +6,7 @@ export const Default = () => `
   <header class="top-nav">
     <div class="top-nav-inner">
       <a class="top-nav-brand" href="./index.html" aria-label="Pozu home">
-        <img class="top-nav-logo" src="./pozu-logo.svg" alt="" aria-hidden="true" />
+        <img class="top-nav-logo" src="./assets/pozu-logo.svg" alt="" aria-hidden="true" />
         <span>Pozu</span>
       </a>
       <nav class="top-nav-links" aria-label="View modes">
