@@ -1,7 +1,7 @@
 {
     "name": "pozu",
     "version": "0.1.0",
-    "description": "Random EMBER frame labeling page powered by @talmolab/sleap-io.js, plus a Flask annotation receiver.",
+    "description": "Random EMBER frame labeling page, plus a Flask annotation receiver.",
     "private": true,
     "type": "module",
     "scripts": {
@@ -39,8 +39,5 @@
         "typescript": "^5.7.2",
         "vite": "^6.4.2",
         "vitest": "^2.1.9"
-    },
-    "dependencies": {
-        "@talmolab/sleap-io.js": "0.2.3"
     }
 }

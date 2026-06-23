@@ -3,11 +3,9 @@
  * REQUIRED_LABEL_IDS set enforced by `backend.py` (and the original
  * pozoo schema).
  *
- * This module is pure data + a tiny factory and is the canonical
- * source-of-truth for the labeling UI and the JSON payload.
+ * This module is pure data and is the canonical source-of-truth
+ * for the labeling UI and the JSON payload.
  */
-import { Skeleton, Node, Edge } from "@talmolab/sleap-io.js";
-
 export interface LabelDefinition {
     id: string;
     name: string;
@@ -32,16 +30,3 @@ export const EDGE_DEFINITIONS: ReadonlyArray<readonly [string, string]> = [
     ["tail_base", "right_hind_paw"],
 ];
 
-/** Construct a sleap-io.js `Skeleton` from {@link LABEL_DEFINITIONS}. */
-export function buildSkeleton(): Skeleton {
-    const skeleton = new Skeleton({
-        name: "pozu",
-        nodes: LABEL_DEFINITIONS.map((d) => new Node(d.id)),
-    });
-    for (const [src, dst] of EDGE_DEFINITIONS) {
-        skeleton.edges.push(
-            new Edge(skeleton.nodes[skeleton.index(src)], skeleton.nodes[skeleton.index(dst)])
-        );
-    }
-    return skeleton;
-}

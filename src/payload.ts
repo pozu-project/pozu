@@ -1,9 +1,7 @@
 /**
- * Pure builders for the JSON payload sent to `backend.py` and for the
- * sleap-io.js `Labels` object. Kept side-effect-free so they can be
- * exercised by unit tests under `tests/unit/`.
+ * Pure builders for the JSON payload sent to `backend.py`.
+ * Kept side-effect-free so they can be exercised by unit tests under `tests/unit/`.
  */
-import { Video, Instance, LabeledFrame, Labels, type Skeleton } from "@talmolab/sleap-io.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
 
 /** Per-node placement coordinates in original-video pixel space. */
@@ -73,46 +71,6 @@ export function buildPayload(opts: BuildPayloadOptions): BackendPayload {
         timestamp: now(),
         labels,
     };
-}
-
-export interface BuildLabelsOptions {
-    videoUrl: string;
-    frameIndex: number;
-    videoMeta: VideoMeta;
-    placed: ReadonlyMap<string, PlacedPoint>;
-    skeleton: Skeleton;
-}
-
-/**
- * Materialise the placed points as a sleap-io.js `Labels` object.
- * Used with `saveSlpToBytes` before label submission.
- */
-export function buildLabelsObject(opts: BuildLabelsOptions): Labels {
-    const video = new Video({ filename: opts.videoUrl });
-    video.shape = [opts.videoMeta.totalFrames, opts.videoMeta.height, opts.videoMeta.width, 3];
-
-    const points = opts.skeleton.nodes.map((node) => {
-        const entry = opts.placed.get(node.name);
-        if (!entry) {
-            return { xy: [NaN, NaN] as [number, number], visible: false, complete: false };
-        }
-        return {
-            xy: [entry.pixelX, entry.pixelY] as [number, number],
-            visible: true,
-            complete: true,
-        };
-    });
-    const instance = new Instance({ skeleton: opts.skeleton, points });
-    const labeledFrame = new LabeledFrame({
-        video,
-        frameIdx: opts.frameIndex,
-        instances: [instance],
-    });
-    return new Labels({
-        skeletons: [opts.skeleton],
-        videos: [video],
-        labeledFrames: [labeledFrame],
-    });
 }
 
 /**

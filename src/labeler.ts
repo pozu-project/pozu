@@ -1,13 +1,12 @@
 /**
  * Labeling-UI wiring: builds the label palette, manages click-to-place
  * and drag-to-adjust on the canvas, and exposes the placed-points map
- * and `Skeleton` so the rest of the app can build payloads / Labels
- * objects from it.
+ * so the rest of the app can build payloads from it.
  *
  * All DOM lookups happen up-front; the page is expected to already
  * include the elements declared in `src/index.html`.
  */
-import { buildSkeleton, LABEL_DEFINITIONS } from "./skeleton.js";
+import { LABEL_DEFINITIONS } from "./skeleton.js";
 import type { PlacedPoint, VideoMeta } from "./payload.js";
 
 interface PlacedEntry extends PlacedPoint {
@@ -19,7 +18,6 @@ interface PlacedEntry extends PlacedPoint {
 export interface Labeler {
     /** Current pixel-space placements, keyed by node id. */
     readonly placed: ReadonlyMap<string, PlacedPoint>;
-    readonly skeleton: ReturnType<typeof buildSkeleton>;
     /** Remove every dot and reset the palette. */
     clearAll(): void;
     /** Update the underlying video meta (canvas size, scale). */
@@ -37,7 +35,6 @@ export interface LabelerOptions {
 }
 
 export function createLabeler(opts: LabelerOptions): Labeler {
-    const skeleton = buildSkeleton();
     const placed = new Map<string, PlacedEntry>();
     const listeners: Array<() => void> = [];
     const notify = () => listeners.forEach((cb) => cb());
@@ -201,7 +198,6 @@ export function createLabeler(opts: LabelerOptions): Labeler {
         get placed() {
             return placed;
         },
-        skeleton,
         clearAll() {
             for (const entry of placed.values()) entry.element?.remove();
             placed.clear();
