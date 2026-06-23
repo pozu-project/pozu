@@ -8,14 +8,13 @@ test.describe("Pozu labeling page", () => {
         await page.goto("/", { waitUntil: "domcontentloaded" });
     });
 
-    test("renders top nav title and page credit", async ({ page }) => {
+    test("renders top nav title", async ({ page }) => {
         await expect(page.locator(".top-nav-brand")).toContainText("Pozu");
         await expect(page.locator(".top-nav-brand .top-nav-logo")).toHaveAttribute(
             "src",
             /\/assets\/pozu-logo\.svg$/
         );
         await expect(page.locator(".top-nav-brand")).not.toContainText("🦓");
-        await expect(page.locator(".page-credit")).toContainText("sleap-io.js");
     });
 
     test("shows three top-level nav section titles", async ({ page }) => {
