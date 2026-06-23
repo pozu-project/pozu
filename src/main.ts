@@ -9,6 +9,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
+import { initAuthControl, renderAuthControl, isSignedIn, AuthError } from "./auth.js";
 
 // ---- Diagnostics ----
 // Surface module-evaluation / async errors directly into the loading
@@ -348,6 +349,11 @@ async function doFocusSubmit() {
     const meta = getVideoMeta();
     if (!meta) return;
 
+    if (!isSignedIn()) {
+        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
+        return;
+    }
+
     const payload = buildPayload({
         videoUrl: VIDEO_URL,
         frameIndex,
@@ -360,6 +366,12 @@ async function doFocusSubmit() {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Focus submit failed:", err);
+        if (err instanceof AuthError) {
+            renderAuthControl();
+            showStatus("error", err.message);
+            setControlsEnabled(true);
+            return;
+        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit: ${msg}`);
         setControlsEnabled(true);
@@ -405,6 +417,11 @@ downloadBtn.addEventListener("click", async () => {
         return;
     }
 
+    if (!isSignedIn()) {
+        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
+        return;
+    }
+
     const meta = getVideoMeta();
     if (!meta) {
         showStatus("error", "Video metadata unavailable. Load a frame and try again.");
@@ -423,6 +440,12 @@ downloadBtn.addEventListener("click", async () => {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Label JSON submission failed:", err);
+        if (err instanceof AuthError) {
+            renderAuthControl();
+            showStatus("error", err.message);
+            setControlsEnabled(true);
+            return;
+        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit labels: ${msg}`);
         setControlsEnabled(true);
@@ -457,6 +480,7 @@ if (initialHash && initialHash in VIEW_MODE_NAMES) {
 }
 
 buildFocusPicker();
+initAuthControl();
 
 // ---- Boot ----
 (async () => {

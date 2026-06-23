@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { LABEL_ANNOTATION_API_URL, submitLabelPayload } from "../../src/label-api.ts";
+import { AuthError } from "../../src/auth.ts";
 import type { BackendPayload } from "../../src/payload.ts";
 
 const payload: BackendPayload = {
@@ -14,6 +15,10 @@ const payload: BackendPayload = {
 };
 
 describe("submitLabelPayload", () => {
+    afterEach(() => {
+        localStorage.clear();
+    });
+
     it("posts JSON to the labels annotation endpoint", async () => {
         const fetchMock = vi.fn(async () => new Response("", { status: 202 }));
 
@@ -28,6 +33,34 @@ describe("submitLabelPayload", () => {
             },
             body: JSON.stringify(payload),
         });
+    });
+
+    it("attaches a bearer header when a token is stored", async () => {
+        localStorage.setItem("pozu.auth.token", "header.eyJleHAiOjk5OTk5OTk5OTl9.sig");
+        const fetchMock = vi.fn(async () => new Response("", { status: 202 }));
+
+        await submitLabelPayload(payload, fetchMock as unknown as typeof fetch);
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            LABEL_ANNOTATION_API_URL,
+            expect.objectContaining({
+                headers: expect.objectContaining({
+                    Authorization: "Bearer header.eyJleHAiOjk5OTk5OTk5OTl9.sig",
+                }),
+            })
+        );
+    });
+
+    it("clears the token and throws AuthError on 401", async () => {
+        localStorage.setItem("pozu.auth.token", "header.eyJleHAiOjk5OTk5OTk5OTl9.sig");
+        const fetchMock = vi.fn(
+            async () => new Response("", { status: 401, statusText: "Unauthorized" })
+        );
+
+        await expect(
+            submitLabelPayload(payload, fetchMock as unknown as typeof fetch)
+        ).rejects.toBeInstanceOf(AuthError);
+        expect(localStorage.getItem("pozu.auth.token")).toBeNull();
     });
 
     it("throws with response detail when the server rejects the payload", async () => {

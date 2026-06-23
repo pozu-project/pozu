@@ -31,8 +31,83 @@ body {
     justify-content: flex-start;
 }
 
-.top-nav-github {
+.top-nav-auth {
     margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-signin {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 8px;
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.auth-signin:hover {
+    background: rgba(148, 163, 184, 0.22);
+    border-color: rgba(148, 163, 184, 0.6);
+}
+
+.auth-signin svg {
+    width: 16px;
+    height: 16px;
+}
+
+.auth-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.auth-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #f8fafc;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.auth-signout {
+    font: inherit;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    transition: color 0.15s;
+}
+
+.auth-signout:hover {
+    color: #f8fafc;
+    text-decoration: underline;
+}
+
+.top-nav-github {
+    margin-left: 14px;
     display: inline-flex;
     align-items: center;
     color: #94a3b8;

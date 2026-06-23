@@ -1,4 +1,5 @@
 import type { BackendPayload } from "./payload.js";
+import { authHeader, clearToken, AuthError } from "./auth.js";
 
 export const LABEL_ANNOTATION_API_URL =
     "https://pozu-codycbakerphd.pythonanywhere.com/api/v1/annotations/labels";
@@ -12,11 +13,19 @@ export async function submitLabelPayload(
         headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            ...authHeader(),
         },
         body: JSON.stringify(payload),
     });
 
     if (response.ok) return;
+
+    // A rejected token is an auth problem, not a payload problem: drop it
+    // so the UI falls back to a signed-out state and prompts re-login.
+    if (response.status === 401) {
+        clearToken();
+        throw new AuthError();
+    }
 
     console.error("[pozu] label submission payload:", JSON.stringify(payload, null, 2));
 

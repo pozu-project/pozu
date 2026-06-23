@@ -18,6 +18,7 @@ import { createZoomController } from "./zoom.js";
 import { pickRandomFrame, type VideoMeta } from "./payload.js";
 import { buildBoxPayload, normaliseBox, clampBox, type Box } from "./box-payload.js";
 import { submitBoxPayload } from "./box-api.js";
+import { initAuthControl, renderAuthControl, isSignedIn, AuthError } from "./auth.js";
 
 // ---- Diagnostics ----
 // Mirror main.ts so failures on the deployed preview surface in the
@@ -317,6 +318,12 @@ downloadBtn.addEventListener("click", async () => {
         showStatus("error", "No box drawn yet.");
         return;
     }
+
+    if (!isSignedIn()) {
+        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
+        return;
+    }
+
     const meta = getVideoMeta();
     if (!meta) {
         showStatus("error", "Video metadata unavailable. Load a frame and try again.");
@@ -335,6 +342,12 @@ downloadBtn.addEventListener("click", async () => {
         await submitBoxPayload(payload);
     } catch (err) {
         console.error("Box JSON submission failed:", err);
+        if (err instanceof AuthError) {
+            renderAuthControl();
+            showStatus("error", err.message);
+            setControlsEnabled(true);
+            return;
+        }
         const msg = err instanceof Error ? err.message : String(err);
         showIssueModal(
             `Something went wrong while submitting this annotation (${msg}). Please submit an issue at the GitHub issues link below.`
@@ -363,6 +376,7 @@ window.addEventListener("resize", () => {
 });
 
 // ---- Boot ----
+initAuthControl();
 updateBoxUI();
 (async () => {
     try {

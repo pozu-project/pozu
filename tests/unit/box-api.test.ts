@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { BOX_ANNOTATION_API_URL, submitBoxPayload } from "../../src/box-api.ts";
+import { AuthError } from "../../src/auth.ts";
 
 const payload = {
     video_url: "https://example.com/video.mp4",
@@ -13,6 +14,10 @@ const payload = {
 };
 
 describe("submitBoxPayload", () => {
+    afterEach(() => {
+        localStorage.clear();
+    });
+
     it("posts JSON to the bbox annotation endpoint", async () => {
         const fetchMock = vi.fn(async () => new Response("", { status: 202 }));
 
@@ -37,5 +42,17 @@ describe("submitBoxPayload", () => {
         await expect(
             submitBoxPayload(payload, fetchMock as unknown as typeof fetch)
         ).rejects.toThrow("Server rejected submission (400 Bad Request): bad payload");
+    });
+
+    it("clears the token and throws AuthError on 401", async () => {
+        localStorage.setItem("pozu.auth.token", "header.eyJleHAiOjk5OTk5OTk5OTl9.sig");
+        const fetchMock = vi.fn(
+            async () => new Response("", { status: 401, statusText: "Unauthorized" })
+        );
+
+        await expect(
+            submitBoxPayload(payload, fetchMock as unknown as typeof fetch)
+        ).rejects.toBeInstanceOf(AuthError);
+        expect(localStorage.getItem("pozu.auth.token")).toBeNull();
     });
 });
