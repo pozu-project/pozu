@@ -125,12 +125,12 @@ export function authHeader(): Record<string, string> {
 
 /**
  * Reflect the current auth state into the shared nav control. The single
- * button morphs in place: a GitHub "Sign in" call-to-action when signed
- * out, or the user's avatar + name (click to sign out) when signed in.
+ * button morphs in place: a plain "Sign in" call-to-action when signed
+ * out (opens the method picker), or the user's avatar + name (click to
+ * sign out) when signed in.
  */
 export function renderAuthControl(): void {
     const btn = document.getElementById("authBtn");
-    const icon = document.getElementById("authIcon");
     const avatar = document.getElementById("authAvatar") as HTMLImageElement | null;
     const label = document.getElementById("authLabel");
     const user = getUser();
@@ -138,7 +138,6 @@ export function renderAuthControl(): void {
     if (user) {
         const name = user.name || user.login || "Signed in";
         if (label) label.textContent = name;
-        if (icon) icon.hidden = true;
         if (avatar) {
             if (user.avatar_url) {
                 avatar.src = user.avatar_url;
@@ -151,27 +150,39 @@ export function renderAuthControl(): void {
         btn?.setAttribute("aria-label", `Signed in as ${name} — click to sign out`);
     } else {
         if (label) label.textContent = "Sign in";
-        if (icon) icon.hidden = false;
         if (avatar) avatar.hidden = true;
-        btn?.setAttribute("title", "Sign in with GitHub");
-        btn?.setAttribute("aria-label", "Sign in with GitHub");
+        btn?.setAttribute("title", "Sign in");
+        btn?.setAttribute("aria-label", "Sign in");
     }
 }
 
 /**
  * One-shot boot for the nav auth control: capture any returning token,
- * wire the single sign-in / sign-out button, and render the current
- * state. Safe to call on pages that lack the control (the lookup no-ops).
+ * wire the nav button (open the sign-in method picker when signed out,
+ * sign out when signed in) and the picker's provider buttons, and render
+ * the current state. Safe to call on pages that lack the control.
  */
 export function initAuthControl(): void {
     captureTokenFromHash();
+    const modal = document.getElementById("signInModal") as HTMLDialogElement | null;
+
     document.getElementById("authBtn")?.addEventListener("click", () => {
         if (isSignedIn()) {
             clearToken();
             renderAuthControl();
+        } else if (typeof modal?.showModal === "function") {
+            modal.showModal();
         } else {
+            // No <dialog> support / no modal on the page: go straight to
+            // the only available method.
             signIn();
         }
     });
+
+    document.getElementById("signInGitHubBtn")?.addEventListener("click", () => {
+        modal?.close();
+        signIn();
+    });
+
     renderAuthControl();
 }
