@@ -115,9 +115,11 @@ export function onAuthChange(cb: () => void): void {
 function syncNavAuth(): void {
     const signedIn = isSignedIn();
     for (const btn of document.querySelectorAll<HTMLButtonElement>(".top-nav-link[data-view-mode]")) {
+        if (btn.hasAttribute("data-always-disabled")) continue;
         btn.disabled = !signedIn;
     }
     for (const a of document.querySelectorAll<HTMLElement>("nav .top-nav-link[href]")) {
+        if (a.hasAttribute("data-always-disabled")) continue;
         a.setAttribute("aria-disabled", signedIn ? "false" : "true");
         a.setAttribute("tabindex", signedIn ? "0" : "-1");
     }
