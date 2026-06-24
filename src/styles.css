@@ -283,7 +283,8 @@ h1 {
 }
 
 .controls button,
-.bottom-actions button {
+.bottom-actions button,
+#resetBtn {
     padding: 8px 18px;
     border: none;
     border-radius: 6px;
@@ -296,13 +297,15 @@ h1 {
 }
 
 .controls button:hover,
-.bottom-actions button:hover {
+.bottom-actions button:hover,
+#resetBtn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .controls button:disabled,
-.bottom-actions button:disabled {
+.bottom-actions button:disabled,
+#resetBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;

@@ -132,10 +132,10 @@ test.describe("Pozu labeling page", () => {
     }) => {
         await expect(page.locator("#jsonOutput")).toHaveCount(0);
         await expect(page.locator(".output-section")).toHaveCount(0);
-        await expect(page.locator(".controls #resetBtn")).toBeVisible();
+        await expect(page.locator("#labelSidebarContent #resetBtn")).toBeVisible();
         await expect(page.locator(".bottom-actions #newFrameBtn")).toBeVisible();
         await expect(page.locator(".bottom-actions #downloadBtn")).toBeVisible();
-        await expect(page.locator(".bottom-actions #resetBtn")).toHaveCount(0);
+        await expect(page.locator(".controls #resetBtn")).toHaveCount(0);
     });
 });
 
@@ -193,12 +193,12 @@ test.describe("Pozu box-selection page", () => {
 
     test("shows box controls with updated bottom actions", async ({ page }) => {
         await expect(page.locator("#newFrameBtn")).toContainText("No Subject Present");
-        await expect(page.locator("#resetBtn")).toContainText("Reset Box");
+        await expect(page.locator(".bottom-actions #resetBtn")).toContainText("Reset Box");
         await expect(page.locator("#downloadBtn")).toContainText("Submit");
     });
 
     test("Reset and Submit start disabled and box/json panels are absent", async ({ page }) => {
-        await expect(page.locator("#resetBtn")).toBeDisabled();
+        await expect(page.locator(".bottom-actions #resetBtn")).toBeDisabled();
         await expect(page.locator("#downloadBtn")).toBeDisabled();
         await expect(page.locator("#jsonOutput")).toHaveCount(0);
         await expect(page.locator("#boxCoords")).toHaveCount(0);
