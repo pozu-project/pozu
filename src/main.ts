@@ -14,6 +14,11 @@ import { initAuthControl, isSignedIn, onAuthChange } from "./auth.js";
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent = `v${__APP_VERSION__}`;
 
+const devMode = new URLSearchParams(window.location.search).has("dev-mode");
+if (devMode) {
+    document.querySelector<HTMLElement>(".top-nav-devmode-link")?.classList.add("active");
+}
+
 // ---- Diagnostics ----
 // Surface module-evaluation / async errors directly into the loading
 // overlay so failures on the deployed preview don't silently hang.
@@ -267,7 +272,8 @@ async function initDemoFrames() {
 function setControlsEnabled(enabled: boolean) {
     newFrameBtn.disabled = !enabled;
     resetBtn.disabled = !enabled;
-    downloadBtn.disabled = !enabled;
+    // In dev-mode the submit button is permanently disabled.
+    if (!devMode) downloadBtn.disabled = !enabled;
 }
 
 function setViewMode(mode: ViewMode) {
