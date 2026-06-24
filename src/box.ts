@@ -13,20 +13,15 @@ import { createZoomController } from "./zoom.js";
 import { pickRandomFrame, type VideoMeta } from "./payload.js";
 import { normaliseBox, clampBox, type Box } from "./box-payload.js";
 import { initAuthControl } from "./auth.js";
+import { DEV_MODE, initDevMode } from "./dev-mode.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent = `v${__APP_VERSION__}`;
 
-const devMode = new URLSearchParams(window.location.search).has("dev-mode");
-
-// Mark the Dev Mode nav button active when ?dev-mode is present.
-if (devMode) {
-    document.querySelector<HTMLElement>(".top-nav-devmode-link")?.classList.add("active");
-}
-
+initDevMode();
 initAuthControl();
 
-if (!devMode) {
+if (!DEV_MODE) {
     // Placeholder path — nothing else to do.
 } else {
     // ---- Dev-mode widget ----

@@ -10,14 +10,12 @@ import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
 import { initAuthControl, isSignedIn, onAuthChange } from "./auth.js";
+import { DEV_MODE, initDevMode } from "./dev-mode.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent = `v${__APP_VERSION__}`;
 
-const devMode = new URLSearchParams(window.location.search).has("dev-mode");
-if (devMode) {
-    document.querySelector<HTMLElement>(".top-nav-devmode-link")?.classList.add("active");
-}
+initDevMode();
 
 // ---- Diagnostics ----
 // Surface module-evaluation / async errors directly into the loading
@@ -273,7 +271,7 @@ function setControlsEnabled(enabled: boolean) {
     newFrameBtn.disabled = !enabled;
     resetBtn.disabled = !enabled;
     // In dev-mode the submit button is permanently disabled.
-    if (!devMode) downloadBtn.disabled = !enabled;
+    if (!DEV_MODE) downloadBtn.disabled = !enabled;
 }
 
 function setViewMode(mode: ViewMode) {

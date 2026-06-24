@@ -18,6 +18,37 @@ body {
     width: 100%;
     border-bottom: 1px solid rgba(148, 163, 184, 0.25);
     background: #020617;
+    position: relative;
+}
+
+/* Dev-mode visual indicator — green stripe along the top of the nav bar. */
+body.dev-mode .top-nav {
+    border-bottom-color: rgba(34, 197, 94, 0.35);
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.06) 0%, #020617 40%);
+}
+
+body.dev-mode .top-nav::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #4ade80 30%, #86efac 50%, #4ade80 70%, transparent 100%);
+    opacity: 0.8;
+}
+
+body.dev-mode .top-nav-devmode-link {
+    background: rgba(34, 197, 94, 0.28);
+    border-color: #4ade80;
+    color: #86efac;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    animation: dev-mode-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes dev-mode-pulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(34, 197, 94, 0.25); }
+    50%       { box-shadow: 0 0 14px rgba(34, 197, 94, 0.55); }
 }
 
 .top-nav-inner {
