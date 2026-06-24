@@ -18,7 +18,7 @@ import { createZoomController } from "./zoom.js";
 import { pickRandomFrame, type VideoMeta } from "./payload.js";
 import { buildBoxPayload, normaliseBox, clampBox, type Box } from "./box-payload.js";
 import { submitBoxPayload } from "./box-api.js";
-import { initAuthControl, renderAuthControl, isSignedIn, onAuthChange, notifyAuthChange, AuthError } from "./auth.js";
+import { initAuthControl, renderAuthControl, notifyAuthChange, AuthError } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -113,20 +113,12 @@ panToggleBtn.addEventListener("click", () =>
     setPanMode(!panToggleBtn.classList.contains("active"))
 );
 
-let controlsEnabled = false;
-
-function syncButtonState() {
-    const on = controlsEnabled && isSignedIn();
-    newFrameBtn.disabled = !on;
+function setControlsEnabled(enabled: boolean) {
+    newFrameBtn.disabled = !enabled;
     // Reset/download are only meaningful once a box exists; they are
     // re-evaluated by `updateBoxUI` whenever the box state changes.
-    resetBtn.disabled = !on || box == null;
-    downloadBtn.disabled = !on || box == null;
-}
-
-function setControlsEnabled(enabled: boolean) {
-    controlsEnabled = enabled;
-    syncButtonState();
+    resetBtn.disabled = !enabled || box == null;
+    downloadBtn.disabled = !enabled || box == null;
 }
 
 function showStatus(type: "info" | "success" | "error", message: string) {
@@ -168,7 +160,8 @@ function renderBoxOverlay() {
 function updateBoxUI() {
     renderBoxOverlay();
     downloadBtn.classList.toggle("ready", box != null);
-    syncButtonState();
+    resetBtn.disabled = box == null;
+    downloadBtn.disabled = box == null;
 }
 
 function showIssueModal(message: string) {
@@ -377,7 +370,6 @@ window.addEventListener("resize", () => {
 });
 
 // ---- Boot ----
-onAuthChange(syncButtonState);
 initAuthControl();
 updateBoxUI();
 (async () => {

@@ -222,9 +222,11 @@ body {
     background: var(--nav-accent-bg, rgba(56, 189, 248, 0.16));
 }
 
-.top-nav-link:disabled {
+.top-nav-link:disabled,
+.top-nav-link[aria-disabled="true"] {
     opacity: 0.35;
     cursor: not-allowed;
+    pointer-events: none;
 }
 
 .view-shell {

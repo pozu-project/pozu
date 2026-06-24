@@ -115,7 +115,24 @@ export function onAuthChange(cb: () => void): void {
     authChangeListeners.push(cb);
 }
 
+/**
+ * Reflect the current auth state into the shared nav tabs. Mode-switching
+ * buttons and page-navigation links are disabled when signed out so users
+ * cannot reach any labeling page without an active session.
+ */
+function syncNavAuth(): void {
+    const signedIn = isSignedIn();
+    for (const btn of document.querySelectorAll<HTMLButtonElement>(".top-nav-link[data-view-mode]")) {
+        btn.disabled = !signedIn;
+    }
+    for (const a of document.querySelectorAll<HTMLElement>("nav .top-nav-link[href]")) {
+        a.setAttribute("aria-disabled", signedIn ? "false" : "true");
+        a.setAttribute("tabindex", signedIn ? "0" : "-1");
+    }
+}
+
 export function notifyAuthChange(): void {
+    syncNavAuth();
     for (const cb of authChangeListeners) cb();
 }
 

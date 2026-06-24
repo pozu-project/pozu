@@ -9,7 +9,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
-import { initAuthControl, renderAuthControl, isSignedIn, onAuthChange, notifyAuthChange, AuthError } from "./auth.js";
+import { initAuthControl, renderAuthControl, notifyAuthChange, AuthError } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -193,18 +193,10 @@ labeler.onChange(() => {
 });
 updateSubmitReadyState();
 
-let controlsEnabled = false;
-
-function syncButtonState() {
-    const on = controlsEnabled && isSignedIn();
-    newFrameBtn.disabled = !on;
-    resetBtn.disabled = !on;
-    downloadBtn.disabled = !on;
-}
-
 function setControlsEnabled(enabled: boolean) {
-    controlsEnabled = enabled;
-    syncButtonState();
+    newFrameBtn.disabled = !enabled;
+    resetBtn.disabled = !enabled;
+    downloadBtn.disabled = !enabled;
 }
 
 function setViewMode(mode: ViewMode) {
@@ -476,7 +468,6 @@ if (initialHash && initialHash in VIEW_MODE_NAMES) {
 }
 
 buildFocusPicker();
-onAuthChange(syncButtonState);
 initAuthControl();
 
 // ---- Boot ----
