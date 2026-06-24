@@ -289,21 +289,24 @@ function showStatus(type: "info" | "success" | "error", message: string) {
 
 // ---- Frame sizing ----
 // Keep in sync with `.view-shell` / `.top-nav-inner` max-width in styles.css.
-const SHELL_MAX_WIDTH = 1760;
+const SHELL_MAX_WIDTH = 2288;
 // Horizontal space in the label row the frame can't use: shell padding, the
 // 300px sidebar, the zoom rail, and the gaps between them.
 const FRAME_RESERVED_WIDTH = 420;
 const MIN_FRAME_WIDTH = 360;
+// Let the frame render up to 30% past its native resolution so it fills wide
+// screens more fully; a mild upscale that's still crisp enough for labeling.
+const FRAME_OVERSCALE = 1.3;
 
-// Size the canvas to fill the available row width without upscaling past the
-// frame's native resolution (which would blur it and hurt label precision).
+// Size the canvas to fill the available row width, allowing a modest upscale
+// past the frame's native resolution (see FRAME_OVERSCALE).
 function fitCanvasToViewport(): void {
     if (!videoModel) return;
     const { width: w, height: h } = videoModel.meta;
     if (!w || !h) return;
     const shellInner = Math.min(window.innerWidth, SHELL_MAX_WIDTH) - 40;
     const available = Math.max(MIN_FRAME_WIDTH, shellInner - FRAME_RESERVED_WIDTH);
-    const displayWidth = Math.min(available, w);
+    const displayWidth = Math.min(available, w * FRAME_OVERSCALE);
     displayScale = displayWidth / w;
     canvas.style.width = `${displayWidth}px`;
     canvas.style.height = `${h * displayScale}px`;

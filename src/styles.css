@@ -23,7 +23,7 @@ body {
 .top-nav-inner {
     /* Keep in sync with `.view-shell` max-width and `SHELL_MAX_WIDTH` in
        main.ts / box.ts, which size the frame to fill the same row. */
-    max-width: 1760px;
+    max-width: 2288px;
     margin: 0 auto;
     min-height: 80px;
     padding: 0 20px;
@@ -239,7 +239,7 @@ body {
 
 .view-shell {
     width: 100%;
-    max-width: 1760px;
+    max-width: 2288px;
     margin: 0 auto;
     padding: 20px 20px 40px;
     min-height: calc(100vh - 80px);
