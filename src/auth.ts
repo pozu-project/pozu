@@ -33,14 +33,6 @@ export interface AuthUser {
     exp?: number;
 }
 
-/** Thrown when the backend rejects the JWT (expired or invalid). */
-export class AuthError extends Error {
-    constructor(message = "Your session has expired — please sign in with GitHub again.") {
-        super(message);
-        this.name = "AuthError";
-    }
-}
-
 /**
  * Decode a JWT payload for display only — the signature is NOT verified
  * (that is the backend's job). Returns null for anything that isn't a
@@ -108,6 +100,34 @@ export function clearToken(): void {
     localStorage.removeItem(STORAGE_KEY);
 }
 
+const authChangeListeners: (() => void)[] = [];
+
+/** Register a callback to be invoked whenever the signed-in state changes. */
+export function onAuthChange(cb: () => void): void {
+    authChangeListeners.push(cb);
+}
+
+/**
+ * Reflect the current auth state into the shared nav tabs. Mode-switching
+ * buttons and page-navigation links are disabled when signed out so users
+ * cannot reach any labeling page without an active session.
+ */
+function syncNavAuth(): void {
+    const signedIn = isSignedIn();
+    for (const btn of document.querySelectorAll<HTMLButtonElement>(".top-nav-link[data-view-mode]")) {
+        btn.disabled = !signedIn;
+    }
+    for (const a of document.querySelectorAll<HTMLElement>("nav .top-nav-link[href]")) {
+        a.setAttribute("aria-disabled", signedIn ? "false" : "true");
+        a.setAttribute("tabindex", signedIn ? "0" : "-1");
+    }
+}
+
+export function notifyAuthChange(): void {
+    syncNavAuth();
+    for (const cb of authChangeListeners) cb();
+}
+
 /** Navigate to the backend to begin the GitHub OAuth flow. */
 export function signIn(): void {
     window.location.assign(LOGIN_URL);
@@ -169,7 +189,7 @@ export function initAuthControl(): void {
     document.getElementById("authBtn")?.addEventListener("click", () => {
         if (isSignedIn()) {
             clearToken();
-            renderAuthControl();
+            window.location.assign("./index.html");
         } else if (typeof modal?.showModal === "function") {
             modal.showModal();
         } else {
@@ -185,4 +205,5 @@ export function initAuthControl(): void {
     });
 
     renderAuthControl();
+    notifyAuthChange();
 }

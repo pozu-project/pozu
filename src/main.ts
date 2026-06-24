@@ -9,7 +9,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
-import { initAuthControl, renderAuthControl, isSignedIn, AuthError } from "./auth.js";
+import { initAuthControl, isSignedIn, onAuthChange } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -26,10 +26,7 @@ function showFatal(label: string, err: unknown): void {
         overlay.textContent = `❌ ${label}: ${msg}. See the browser console for details; click 🚫 No Subject Present to retry.`;
         overlay.style.display = "flex";
     }
-    for (const id of ["newFrameBtn", "resetBtn", "downloadBtn"]) {
-        const btn = document.getElementById(id) as HTMLButtonElement | null;
-        if (btn) btn.disabled = false;
-    }
+    setControlsEnabled(true);
 }
 window.addEventListener("error", (e) => showFatal("Uncaught error", e.error ?? e.message));
 window.addEventListener("unhandledrejection", (e) =>
@@ -55,17 +52,18 @@ const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
 const labelPalette = document.getElementById("labelPalette") as HTMLElement;
-const frameInfo = document.getElementById("frameInfo") as HTMLElement;
 const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
 const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
+const demoControls = document.getElementById("demoControls") as HTMLElement;
+const demoPrevBtn = document.getElementById("demoPrevBtn") as HTMLButtonElement;
+const demoNextBtn = document.getElementById("demoNextBtn") as HTMLButtonElement;
+const demoCounter = document.getElementById("demoCounter") as HTMLElement;
 const labelView = document.getElementById("labelView") as HTMLElement;
 const comingSoonView = document.getElementById("comingSoonView") as HTMLElement;
 const comingSoonModeName = document.getElementById("comingSoonModeName") as HTMLElement;
 const binaryDemo = document.getElementById("binaryDemo") as HTMLElement;
-const labelInstructions = document.getElementById("labelInstructions") as HTMLElement;
-const focusInstructions = document.getElementById("focusInstructions") as HTMLElement;
 const labelSidebarContent = document.getElementById("labelSidebarContent") as HTMLElement;
 const focusSidebarContent = document.getElementById("focusSidebarContent") as HTMLElement;
 const focusKeypointSelect = document.getElementById("focusKeypointSelect") as HTMLSelectElement;
@@ -87,6 +85,12 @@ setStage("Booting pozu… (loading video)");
 let videoModel: VideoModel | null = null;
 let frameIndex = 0;
 let displayScale = 1;
+
+// ---- Demo mode state ----
+const DEMO_FRAME_COUNT = 10;
+let demoMode = false;
+let demoFrameIndices: number[] = [];
+let demoPosition = 0;
 
 // ---- Next-frame prefetch ----
 // The expensive step between labelings is the HTML5 `<video>` seek inside
@@ -196,6 +200,45 @@ labeler.onChange(() => {
 });
 updateSubmitReadyState();
 
+function updateDemoNav() {
+    demoPrevBtn.disabled = demoPosition === 0;
+    demoNextBtn.disabled = demoPosition === DEMO_FRAME_COUNT - 1;
+    demoCounter.textContent = `${demoPosition + 1} / ${DEMO_FRAME_COUNT}`;
+}
+
+function enterDemoMode() {
+    demoMode = true;
+    newFrameBtn.hidden = true;
+    downloadBtn.hidden = true;
+    demoControls.hidden = false;
+    demoCounter.textContent = `1 / ${DEMO_FRAME_COUNT}`;
+    demoPrevBtn.disabled = true;
+    demoNextBtn.disabled = true;
+}
+
+function exitDemoMode() {
+    demoMode = false;
+    newFrameBtn.hidden = false;
+    downloadBtn.hidden = false;
+    demoControls.hidden = true;
+    loadRandomFrame();
+}
+
+async function initDemoFrames() {
+    if (!videoModel) return;
+    const total = await refreshTotalFrames(videoModel);
+    demoFrameIndices = [];
+    let prev = -1;
+    for (let i = 0; i < DEMO_FRAME_COUNT; i++) {
+        const idx = pickRandomFrame(total, prev);
+        demoFrameIndices.push(idx);
+        prev = idx;
+    }
+    demoPosition = 0;
+    await showFrame(demoFrameIndices[0]);
+    updateDemoNav();
+}
+
 function setControlsEnabled(enabled: boolean) {
     newFrameBtn.disabled = !enabled;
     resetBtn.disabled = !enabled;
@@ -211,8 +254,6 @@ function setViewMode(mode: ViewMode) {
         labelView.hidden = false;
         comingSoonView.hidden = true;
         focusModeActive = mode === "focus";
-        labelInstructions.hidden = mode === "focus";
-        focusInstructions.hidden = mode !== "focus";
         labelSidebarContent.hidden = mode === "focus";
         focusSidebarContent.hidden = mode !== "focus";
         resetBtn.hidden = mode === "focus";
@@ -243,7 +284,6 @@ function showStatus(type: "info" | "success" | "error", message: string) {
 async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null>) {
     if (!videoModel) return;
     setControlsEnabled(false);
-    frameInfo.textContent = `Decoding frame ${idx}…`;
 
     const bitmap = await (bitmapPromise ?? videoModel.video.getFrame(idx));
     if (bitmap == null) {
@@ -281,8 +321,6 @@ async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null
     zoom.reset();
     zoomSlider.disabled = false;
 
-    frameInfo.textContent =
-        `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;
     setControlsEnabled(true);
 
     // Current frame is painted; the `<video>` is now free to seek ahead.
@@ -353,11 +391,6 @@ async function doFocusSubmit() {
     const meta = getVideoMeta();
     if (!meta) return;
 
-    if (!isSignedIn()) {
-        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
-        return;
-    }
-
     const payload = buildPayload({
         videoUrl: VIDEO_URL,
         frameIndex,
@@ -370,12 +403,6 @@ async function doFocusSubmit() {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Focus submit failed:", err);
-        if (err instanceof AuthError) {
-            renderAuthControl();
-            showStatus("error", err.message);
-            setControlsEnabled(true);
-            return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit: ${msg}`);
         setControlsEnabled(true);
@@ -397,6 +424,22 @@ async function doFocusSubmit() {
 }
 
 // ---- Buttons ----
+demoPrevBtn.addEventListener("click", () => {
+    if (demoPosition <= 0) return;
+    demoPosition--;
+    demoPrevBtn.disabled = true;
+    demoNextBtn.disabled = true;
+    showFrame(demoFrameIndices[demoPosition]).then(updateDemoNav);
+});
+
+demoNextBtn.addEventListener("click", () => {
+    if (demoPosition >= DEMO_FRAME_COUNT - 1) return;
+    demoPosition++;
+    demoPrevBtn.disabled = true;
+    demoNextBtn.disabled = true;
+    showFrame(demoFrameIndices[demoPosition]).then(updateDemoNav);
+});
+
 newFrameBtn.addEventListener("click", () => {
     loadRandomFrame().catch((err: Error) => {
         console.error(err);
@@ -404,10 +447,7 @@ newFrameBtn.addEventListener("click", () => {
         showStatus("error", `Failed to load frame: ${msg}`);
         initialLoading.textContent = `❌ ${msg}. Click 🚫 No Subject Present to retry.`;
         initialLoading.style.display = "flex";
-        // Keep the controls enabled so the user can retry.
-        newFrameBtn.disabled = false;
-        resetBtn.disabled = false;
-        downloadBtn.disabled = false;
+        setControlsEnabled(true);
     });
 });
 
@@ -418,11 +458,6 @@ resetBtn.addEventListener("click", () => {
 downloadBtn.addEventListener("click", async () => {
     if (labeler.placed.size === 0) {
         showStatus("error", "No labels placed yet.");
-        return;
-    }
-
-    if (!isSignedIn()) {
-        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
         return;
     }
 
@@ -444,12 +479,6 @@ downloadBtn.addEventListener("click", async () => {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Label JSON submission failed:", err);
-        if (err instanceof AuthError) {
-            renderAuthControl();
-            showStatus("error", err.message);
-            setControlsEnabled(true);
-            return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit labels: ${msg}`);
         setControlsEnabled(true);
@@ -484,22 +513,30 @@ if (initialHash && initialHash in VIEW_MODE_NAMES) {
 }
 
 buildFocusPicker();
+onAuthChange(() => {
+    if (isSignedIn() && demoMode) exitDemoMode();
+});
 initAuthControl();
 
 // ---- Boot ----
 (async () => {
+    if (isSignedIn()) {
+        newFrameBtn.hidden = false;
+        downloadBtn.hidden = false;
+    }
     try {
         await ensureVideoModel();
-        await loadRandomFrame();
+        if (isSignedIn()) {
+            await loadRandomFrame();
+        } else {
+            enterDemoMode();
+            await initDemoFrames();
+        }
     } catch (err) {
         console.error(err);
         const msg = (err as Error).message;
         initialLoading.textContent = `❌ Failed to load video: ${msg}. Click 🚫 No Subject Present to retry.`;
         showStatus("error", msg);
-        // Re-enable controls so the user can retry instead of being
-        // permanently stuck on the loading overlay.
-        newFrameBtn.disabled = false;
-        resetBtn.disabled = false;
-        downloadBtn.disabled = false;
+        setControlsEnabled(true);
     }
 })();

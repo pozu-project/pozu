@@ -1,5 +1,5 @@
 import type { BoxPayload } from "./box-payload.js";
-import { authHeader, clearToken, AuthError } from "./auth.js";
+import { authHeader, clearToken, notifyAuthChange } from "./auth.js";
 
 export const BOX_ANNOTATION_API_URL =
     "https://pozu-codycbakerphd.pythonanywhere.com/api/v1/annotations/bbox";
@@ -20,11 +20,10 @@ export async function submitBoxPayload(
 
     if (response.ok) return;
 
-    // A rejected token is an auth problem, not a payload problem: drop it
-    // so the UI falls back to a signed-out state and prompts re-login.
     if (response.status === 401) {
         clearToken();
-        throw new AuthError();
+        notifyAuthChange();
+        throw new Error("Your session has expired — please sign in with GitHub again.");
     }
 
     const detail = (await response.text()).trim();

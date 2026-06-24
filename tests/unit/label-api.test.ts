@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LABEL_ANNOTATION_API_URL, submitLabelPayload } from "../../src/label-api.ts";
-import { AuthError } from "../../src/auth.ts";
 import type { BackendPayload } from "../../src/payload.ts";
 
 const payload: BackendPayload = {
@@ -51,7 +50,7 @@ describe("submitLabelPayload", () => {
         );
     });
 
-    it("clears the token and throws AuthError on 401", async () => {
+    it("clears the token and throws on 401", async () => {
         localStorage.setItem("pozu.auth.token", "header.eyJleHAiOjk5OTk5OTk5OTl9.sig");
         const fetchMock = vi.fn(
             async () => new Response("", { status: 401, statusText: "Unauthorized" })
@@ -59,7 +58,7 @@ describe("submitLabelPayload", () => {
 
         await expect(
             submitLabelPayload(payload, fetchMock as unknown as typeof fetch)
-        ).rejects.toBeInstanceOf(AuthError);
+        ).rejects.toThrow("Your session has expired");
         expect(localStorage.getItem("pozu.auth.token")).toBeNull();
     });
 

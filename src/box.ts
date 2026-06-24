@@ -18,7 +18,7 @@ import { createZoomController } from "./zoom.js";
 import { pickRandomFrame, type VideoMeta } from "./payload.js";
 import { buildBoxPayload, normaliseBox, clampBox, type Box } from "./box-payload.js";
 import { submitBoxPayload } from "./box-api.js";
-import { initAuthControl, renderAuthControl, isSignedIn, AuthError } from "./auth.js";
+import { initAuthControl } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -35,10 +35,7 @@ function showFatal(label: string, err: unknown): void {
         overlay.textContent = `❌ ${label}: ${msg}. See the browser console for details; click 🚫 No Subject Present to retry.`;
         overlay.style.display = "flex";
     }
-    for (const id of ["newFrameBtn", "resetBtn", "downloadBtn"]) {
-        const btn = document.getElementById(id) as HTMLButtonElement | null;
-        if (btn) btn.disabled = false;
-    }
+    setControlsEnabled(true);
 }
 window.addEventListener("error", (e) => showFatal("Uncaught error", e.error ?? e.message));
 window.addEventListener("unhandledrejection", (e) =>
@@ -64,7 +61,6 @@ const zoomResetBtn = document.getElementById("zoomResetBtn") as HTMLButtonElemen
 const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
-const frameInfo = document.getElementById("frameInfo") as HTMLElement;
 const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
@@ -231,7 +227,6 @@ window.addEventListener("blur", commitDrag);
 async function showFrame(idx: number) {
     if (!videoModel) return;
     setControlsEnabled(false);
-    frameInfo.textContent = `Decoding frame ${idx}…`;
 
     const bitmap = await videoModel.video.getFrame(idx);
     if (bitmap == null) {
@@ -269,8 +264,6 @@ async function showFrame(idx: number) {
     zoom.reset();
     zoomSlider.disabled = false;
 
-    frameInfo.textContent =
-        `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;
     updateBoxUI();
     setControlsEnabled(true);
 }
@@ -306,9 +299,7 @@ newFrameBtn.addEventListener("click", () => {
         showStatus("error", `Failed to load frame: ${msg}`);
         initialLoading.textContent = `❌ ${msg}. Click 🚫 No Subject Present to retry.`;
         initialLoading.style.display = "flex";
-        newFrameBtn.disabled = false;
-        resetBtn.disabled = false;
-        downloadBtn.disabled = false;
+        setControlsEnabled(true);
     });
 });
 
@@ -320,11 +311,6 @@ resetBtn.addEventListener("click", () => {
 downloadBtn.addEventListener("click", async () => {
     if (!box) {
         showStatus("error", "No box drawn yet.");
-        return;
-    }
-
-    if (!isSignedIn()) {
-        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
         return;
     }
 
@@ -346,12 +332,6 @@ downloadBtn.addEventListener("click", async () => {
         await submitBoxPayload(payload);
     } catch (err) {
         console.error("Box JSON submission failed:", err);
-        if (err instanceof AuthError) {
-            renderAuthControl();
-            showStatus("error", err.message);
-            setControlsEnabled(true);
-            return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showIssueModal(
             `Something went wrong while submitting this annotation (${msg}). Please submit an issue at the GitHub issues link below.`
@@ -391,8 +371,6 @@ updateBoxUI();
         const msg = (err as Error).message;
         initialLoading.textContent = `❌ Failed to load video: ${msg}. Click 🚫 No Subject Present to retry.`;
         showStatus("error", msg);
-        newFrameBtn.disabled = false;
-        resetBtn.disabled = false;
-        downloadBtn.disabled = false;
+        setControlsEnabled(true);
     }
 })();
