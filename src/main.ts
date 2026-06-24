@@ -9,7 +9,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
-import { initAuthControl } from "./auth.js";
+import { initAuthControl, isSignedIn, onAuthChange } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -57,6 +57,10 @@ const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
 const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
+const demoControls = document.getElementById("demoControls") as HTMLElement;
+const demoPrevBtn = document.getElementById("demoPrevBtn") as HTMLButtonElement;
+const demoNextBtn = document.getElementById("demoNextBtn") as HTMLButtonElement;
+const demoCounter = document.getElementById("demoCounter") as HTMLElement;
 const labelView = document.getElementById("labelView") as HTMLElement;
 const comingSoonView = document.getElementById("comingSoonView") as HTMLElement;
 const comingSoonModeName = document.getElementById("comingSoonModeName") as HTMLElement;
@@ -84,6 +88,12 @@ setStage("Booting pozu… (loading video)");
 let videoModel: VideoModel | null = null;
 let frameIndex = 0;
 let displayScale = 1;
+
+// ---- Demo mode state ----
+const DEMO_FRAME_COUNT = 10;
+let demoMode = false;
+let demoFrameIndices: number[] = [];
+let demoPosition = 0;
 
 // ---- Next-frame prefetch ----
 // The expensive step between labelings is the HTML5 `<video>` seek inside
@@ -192,6 +202,45 @@ labeler.onChange(() => {
     }
 });
 updateSubmitReadyState();
+
+function updateDemoNav() {
+    demoPrevBtn.disabled = demoPosition === 0;
+    demoNextBtn.disabled = demoPosition === DEMO_FRAME_COUNT - 1;
+    demoCounter.textContent = `${demoPosition + 1} / ${DEMO_FRAME_COUNT}`;
+}
+
+function enterDemoMode() {
+    demoMode = true;
+    newFrameBtn.hidden = true;
+    downloadBtn.hidden = true;
+    demoControls.hidden = false;
+    demoCounter.textContent = `1 / ${DEMO_FRAME_COUNT}`;
+    demoPrevBtn.disabled = true;
+    demoNextBtn.disabled = true;
+}
+
+function exitDemoMode() {
+    demoMode = false;
+    newFrameBtn.hidden = false;
+    downloadBtn.hidden = false;
+    demoControls.hidden = true;
+    loadRandomFrame();
+}
+
+async function initDemoFrames() {
+    if (!videoModel) return;
+    const total = await refreshTotalFrames(videoModel);
+    demoFrameIndices = [];
+    let prev = -1;
+    for (let i = 0; i < DEMO_FRAME_COUNT; i++) {
+        const idx = pickRandomFrame(total, prev);
+        demoFrameIndices.push(idx);
+        prev = idx;
+    }
+    demoPosition = 0;
+    await showFrame(demoFrameIndices[0]);
+    updateDemoNav();
+}
 
 function setControlsEnabled(enabled: boolean) {
     newFrameBtn.disabled = !enabled;
@@ -383,6 +432,22 @@ async function doFocusSubmit() {
 }
 
 // ---- Buttons ----
+demoPrevBtn.addEventListener("click", () => {
+    if (demoPosition <= 0) return;
+    demoPosition--;
+    demoPrevBtn.disabled = true;
+    demoNextBtn.disabled = true;
+    showFrame(demoFrameIndices[demoPosition]).then(updateDemoNav);
+});
+
+demoNextBtn.addEventListener("click", () => {
+    if (demoPosition >= DEMO_FRAME_COUNT - 1) return;
+    demoPosition++;
+    demoPrevBtn.disabled = true;
+    demoNextBtn.disabled = true;
+    showFrame(demoFrameIndices[demoPosition]).then(updateDemoNav);
+});
+
 newFrameBtn.addEventListener("click", () => {
     loadRandomFrame().catch((err: Error) => {
         console.error(err);
@@ -456,13 +521,25 @@ if (initialHash && initialHash in VIEW_MODE_NAMES) {
 }
 
 buildFocusPicker();
+onAuthChange(() => {
+    if (isSignedIn() && demoMode) exitDemoMode();
+    else if (!isSignedIn() && !demoMode) {
+        enterDemoMode();
+        initDemoFrames();
+    }
+});
 initAuthControl();
 
 // ---- Boot ----
 (async () => {
     try {
         await ensureVideoModel();
-        await loadRandomFrame();
+        if (isSignedIn()) {
+            await loadRandomFrame();
+        } else {
+            enterDemoMode();
+            await initDemoFrames();
+        }
     } catch (err) {
         console.error(err);
         const msg = (err as Error).message;

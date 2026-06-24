@@ -357,6 +357,45 @@ h1 {
     flex-wrap: wrap;
 }
 
+.demo-controls {
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
+.demo-arrow {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    background: #475569;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.demo-arrow:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.demo-arrow:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.demo-counter {
+    font-family: monospace;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    min-width: 5ch;
+    text-align: center;
+}
+
 .canvas-viewport {
     display: inline-block;
     overflow: hidden;
