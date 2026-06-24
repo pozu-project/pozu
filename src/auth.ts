@@ -119,7 +119,7 @@ function syncNavAuth(): void {
         btn.disabled = !signedIn;
     }
     for (const a of document.querySelectorAll<HTMLElement>("nav .top-nav-link[href]")) {
-        if (a.hasAttribute("data-always-disabled")) continue;
+        if (a.hasAttribute("data-always-disabled") || a.hasAttribute("data-no-auth-gate")) continue;
         a.setAttribute("aria-disabled", signedIn ? "false" : "true");
         a.setAttribute("tabindex", signedIn ? "0" : "-1");
     }

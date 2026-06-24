@@ -178,6 +178,12 @@ body {
     --nav-accent-bg: rgba(52, 211, 153, 0.16);
 }
 
+.nav-section--testing {
+    --nav-accent: #f59e0b;
+    --nav-accent-bg: rgba(245, 158, 11, 0.16);
+    margin-left: auto;
+}
+
 .nav-section-title {
     font-size: 0.65rem;
     font-weight: 700;

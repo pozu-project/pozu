@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Pozu</title>
+        <title>Pozu — Testing</title>
         <link rel="stylesheet" href="./styles.css" />
     </head>
     <body>
@@ -22,16 +22,8 @@
                     <div class="nav-section nav-section--label">
                         <span class="nav-section-title">Label</span>
                         <div class="nav-section-tabs">
-                            <button class="top-nav-link" data-view-mode="focus" type="button">
-                                Focus
-                            </button>
-                            <button
-                                class="top-nav-link active"
-                                data-view-mode="label"
-                                type="button"
-                            >
-                                Full Skeleton
-                            </button>
+                            <a class="top-nav-link" href="./index.html#focus">Focus</a>
+                            <a class="top-nav-link" href="./index.html">Full Skeleton</a>
                             <a class="top-nav-link" href="./box.html">Box</a>
                         </div>
                     </div>
@@ -45,17 +37,13 @@
                     <div class="nav-section nav-section--curate">
                         <span class="nav-section-title">Curate</span>
                         <div class="nav-section-tabs">
-                            <button class="top-nav-link" data-view-mode="binary" data-always-disabled type="button" disabled>
-                                Binary
-                            </button>
-                            <button class="top-nav-link" data-view-mode="track" data-always-disabled type="button" disabled>
-                                Track
-                            </button>
+                            <a class="top-nav-link" href="./index.html#binary" data-always-disabled aria-disabled="true" tabindex="-1">Binary</a>
+                            <a class="top-nav-link" href="./index.html#track" data-always-disabled aria-disabled="true" tabindex="-1">Track</a>
                         </div>
                     </div>
                     <div class="nav-section nav-section--testing">
                         <div class="nav-section-tabs">
-                            <a class="top-nav-link" href="./testing.html" data-no-auth-gate>Testing</a>
+                            <a class="top-nav-link active" href="./testing.html" aria-current="page" data-no-auth-gate>Testing</a>
                         </div>
                     </div>
                 </nav>
@@ -88,14 +76,19 @@
         </header>
 
         <main class="view-shell">
-            <section id="labelView">
+            <section id="testingView">
+                <p class="instructions">
+                    Click and drag on the frame to draw the rectangular box that fully contains the
+                    subject. This is a testing view — annotations cannot be submitted.
+                </p>
+
                 <div class="main-container">
                     <div>
                         <div class="canvas-col">
                             <div class="canvas-viewport" id="canvasViewport">
                                 <div class="loading-fullscreen" id="initialLoading">
                                     <div class="spinner"></div>
-                                    Loading frame...
+                                    Loading the EMBER video & extracting a random frame…
                                 </div>
                                 <div
                                     class="canvas-container"
@@ -103,6 +96,12 @@
                                     style="display: none"
                                 >
                                     <canvas id="frameCanvas"></canvas>
+                                    <div
+                                        class="box-overlay"
+                                        id="boxOverlay"
+                                        style="display: none"
+                                        aria-hidden="true"
+                                    ></div>
                                 </div>
                             </div>
                             <div class="zoom-rail">
@@ -150,42 +149,14 @@
                                 </button>
                             </div>
                             <div class="bottom-actions">
-                                <button id="newFrameBtn" disabled hidden>🚫 No Subject Present</button>
-                                <button id="downloadBtn" disabled hidden>📤 Submit</button>
+                                <button id="newFrameBtn" disabled>🚫 No Subject Present</button>
+                                <button id="resetBtn" disabled>🔄 Reset Box</button>
+                                <button id="downloadBtn" disabled>📤 Submit</button>
                             </div>
-                            <div class="demo-controls" id="demoControls" hidden>
-                                <button id="demoPrevBtn" type="button" class="demo-arrow" aria-label="Previous frame" disabled>&#8592;</button>
-                                <span id="demoCounter" class="demo-counter">1 / 10</span>
-                                <button id="demoNextBtn" type="button" class="demo-arrow" aria-label="Next frame" disabled>&#8594;</button>
-                            </div>
+                            <div id="statusMsg"></div>
                         </div>
-                    </div>
-
-                    <div class="sidebar">
-                        <div id="labelSidebarContent">
-                            <h2>🏷️ Skeleton</h2>
-                            <div class="label-palette" id="labelPalette"></div>
-                            <button id="resetBtn" disabled>🔄 Reset Labels</button>
-                        </div>
-
-                        <div id="focusSidebarContent" hidden>
-                            <h2>🎯 Focus Mode</h2>
-                            <label class="sidebar-hint" for="focusKeypointSelect"
-                                >Keypoint to label (one at a time):</label
-                            >
-                            <select class="focus-keypoint-select" id="focusKeypointSelect"></select>
-                            <div class="focus-count" id="focusCount">Frames labeled: 0</div>
-                        </div>
-
-                        <div id="statusMsg"></div>
                     </div>
                 </div>
-            </section>
-
-            <section id="comingSoonView" class="coming-soon" hidden>
-                <h1><span id="comingSoonModeName">Mode</span> View</h1>
-                <p>Coming soon…</p>
-                <div id="binaryDemo" hidden></div>
             </section>
         </main>
 
@@ -223,6 +194,6 @@
             />
         </a>
 
-        <script type="module" src="./main.ts"></script>
+        <script type="module" src="./testing.ts"></script>
     </body>
 </html>
