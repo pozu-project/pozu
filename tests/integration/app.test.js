@@ -37,14 +37,14 @@ test.describe("Pozu labeling page", () => {
         await expect(conLink).toHaveAttribute("href", "https://centerforopenneuroscience.org");
         await expect(page.locator(".con-badge .con-badge-logo")).toHaveAttribute(
             "src",
-            /\/assets\/con-logo\.svg$/
+            /\/assets\/con-logo\.png$/
         );
     });
 
     test("serves the CON logo asset", async ({ page }) => {
-        const response = await page.request.get("/assets/con-logo.svg");
+        const response = await page.request.get("/assets/con-logo.png");
         expect(response.ok()).toBe(true);
-        expect(response.headers()["content-type"]).toContain("image/svg+xml");
+        expect(response.headers()["content-type"]).toContain("image/png");
     });
 
     test("shows the three primary controls", async ({ page }) => {
