@@ -16,7 +16,7 @@ test.describe("Pozu labeling page", () => {
     });
 
     test("pins the version badge to the static test version", async ({ page }) => {
-        await expect(page.locator("#versionBadge")).toHaveText("v0.0.0");
+        await expect(page.locator("#versionBadge")).toHaveText("vx.y.z");
     });
 
     test("renders top nav title", async ({ page }) => {

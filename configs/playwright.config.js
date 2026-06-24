@@ -26,6 +26,6 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         // Pin the displayed version so visual baselines stay stable across
         // version bumps instead of changing on every PR.
-        env: { POZU_DISPLAY_VERSION: "0.0.0" },
+        env: { POZU_DISPLAY_VERSION: "x.y.z" },
     },
 });
