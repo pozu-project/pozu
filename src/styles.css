@@ -444,8 +444,8 @@ h1 {
     cursor: inherit;
 }
 
-/* Pan/select tool toggle: shows the dotted-rectangle (select) icon when
-   off and the four-arrow move icon when active. */
+/* Pan tool toggle: always the four-arrow move icon; the active state is
+   shown by the highlighted (depressed) background only. */
 .tool-toggle {
     display: inline-flex;
     align-items: center;
@@ -461,18 +461,6 @@ h1 {
 
 .tool-icon {
     display: block;
-}
-
-.tool-toggle .icon-pan {
-    display: none;
-}
-
-.tool-toggle.active .icon-pan {
-    display: block;
-}
-
-.tool-toggle.active .icon-select {
-    display: none;
 }
 
 .canvas-col {
