@@ -31,6 +31,12 @@ export interface ZoomController {
      * regardless of this setting.
      */
     setPanMode(enabled: boolean): void;
+    /**
+     * Toggle "box-zoom mode": while on, a left-drag on the frame draws a
+     * marquee rectangle and, on release, zooms so that rectangle fills the
+     * viewport (no label is placed / box drawn for that drag).
+     */
+    setBoxZoomMode(enabled: boolean): void;
     /** Reset to 1:1 with no pan. */
     reset(): void;
     /** Current scale factor (1 = fit). */
@@ -72,6 +78,14 @@ export function createZoomController(opts: ZoomOptions): ZoomController {
     // `click` (which would otherwise place a label / start a box).
     let panMoved = false;
 
+    let boxZoomMode = false;
+    // Active marquee drag, in viewport-local coordinates, plus the overlay
+    // element that visualises the selection.
+    let boxZoom: { startX: number; startY: number; el: HTMLDivElement } | null = null;
+    // True once a marquee drag has actually moved, so we can swallow the
+    // trailing `click` just like a pan.
+    let boxMoved = false;
+
     /** Untransformed content size, taken from the viewport box. */
     function size(): { w: number; h: number } {
         const r = opts.viewport.getBoundingClientRect();
@@ -92,9 +106,24 @@ export function createZoomController(opts: ZoomOptions): ZoomController {
         opts.onChange?.(scale);
     }
 
-    /** Show the grab cursor whenever a left-drag would pan. */
+    /** Reflect the active tool in the viewport cursor. */
     function updateCursor(): void {
         opts.viewport.classList.toggle("pan-ready", panMode || spaceDown);
+        opts.viewport.classList.toggle("box-zoom-ready", boxZoomMode && !spaceDown);
+    }
+
+    /** Zoom so the viewport-local rectangle (centre + size) fills the view. */
+    function zoomToBox(bcx: number, bcy: number, bw: number, bh: number): void {
+        const { w, h } = size();
+        const next = clamp(scale * Math.min(w / bw, h / bh), min, max);
+        // Content-local point under the box centre, kept fixed at the new
+        // viewport centre.
+        const localX = (bcx - tx) / scale;
+        const localY = (bcy - ty) / scale;
+        scale = next;
+        tx = w / 2 - localX * scale;
+        ty = h / 2 - localY * scale;
+        apply();
     }
 
     /** Zoom to `next`, keeping the content point under (cx, cy) fixed. */
@@ -153,11 +182,70 @@ export function createZoomController(opts: ZoomOptions): ZoomController {
         opts.viewport.classList.remove("panning");
     }
 
+    // ---- Box zoom (marquee drag while the box-zoom tool is on) ----
+    /** Viewport-local pointer position, clamped to the viewport box. */
+    function localPoint(e: MouseEvent): { x: number; y: number } {
+        const r = opts.viewport.getBoundingClientRect();
+        return {
+            x: clamp(e.clientX - r.left, 0, r.width),
+            y: clamp(e.clientY - r.top, 0, r.height),
+        };
+    }
+
+    function drawMarquee(curX: number, curY: number): void {
+        if (!boxZoom) return;
+        const s = boxZoom.el.style;
+        s.left = `${Math.min(boxZoom.startX, curX)}px`;
+        s.top = `${Math.min(boxZoom.startY, curY)}px`;
+        s.width = `${Math.abs(curX - boxZoom.startX)}px`;
+        s.height = `${Math.abs(curY - boxZoom.startY)}px`;
+    }
+
+    function clearMarquee(): void {
+        boxZoom?.el.remove();
+        boxZoom = null;
+    }
+
+    function onBoxStart(e: MouseEvent): void {
+        // Left-drag only; Space still pans even with the box tool armed.
+        if (e.button !== 0 || !boxZoomMode || spaceDown) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const { x, y } = localPoint(e);
+        const el = document.createElement("div");
+        el.className = "zoom-marquee";
+        opts.viewport.appendChild(el);
+        boxZoom = { startX: x, startY: y, el };
+        boxMoved = false;
+        drawMarquee(x, y);
+    }
+
+    function onBoxMove(e: MouseEvent): void {
+        if (!boxZoom) return;
+        const { x, y } = localPoint(e);
+        if (!boxMoved && Math.hypot(x - boxZoom.startX, y - boxZoom.startY) > 2) boxMoved = true;
+        drawMarquee(x, y);
+    }
+
+    function onBoxEnd(e: MouseEvent): void {
+        if (!boxZoom) return;
+        const { startX, startY } = boxZoom;
+        const { x, y } = localPoint(e);
+        clearMarquee();
+        const bw = Math.abs(x - startX);
+        const bh = Math.abs(y - startY);
+        // Ignore an accidental click / sliver of a drag.
+        if (bw < 8 || bh < 8) return;
+        zoomToBox((startX + x) / 2, (startY + y) / 2, bw, bh);
+    }
+
     function onClickCapture(e: MouseEvent): void {
-        // Swallow the click that ends a pan drag, and any click while pan
-        // mode is on, so it isn't treated as a label placement.
-        if (panMoved || panMode) {
+        // Swallow the click that ends a pan / box-zoom drag, and any click
+        // while one of those tools is on, so it isn't treated as a label
+        // placement.
+        if (panMoved || panMode || boxMoved || boxZoomMode) {
             panMoved = false;
+            boxMoved = false;
             e.preventDefault();
             e.stopPropagation();
         }
@@ -209,12 +297,22 @@ export function createZoomController(opts: ZoomOptions): ZoomController {
         updateCursor();
     }
 
+    function setBoxZoomMode(enabled: boolean): void {
+        boxZoomMode = enabled;
+        if (!enabled) clearMarquee();
+        updateCursor();
+    }
+
     opts.viewport.addEventListener("wheel", onWheel, { passive: false });
     opts.viewport.addEventListener("mousedown", onPanStart, true);
+    opts.viewport.addEventListener("mousedown", onBoxStart, true);
     opts.viewport.addEventListener("click", onClickCapture, true);
     document.addEventListener("mousemove", onPanMove);
+    document.addEventListener("mousemove", onBoxMove);
     document.addEventListener("mouseup", onPanEnd);
+    document.addEventListener("mouseup", onBoxEnd);
     window.addEventListener("blur", onPanEnd);
+    window.addEventListener("blur", clearMarquee);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
@@ -223,15 +321,21 @@ export function createZoomController(opts: ZoomOptions): ZoomController {
     return {
         setScale: zoomCentered,
         setPanMode,
+        setBoxZoomMode,
         reset,
         getScale: () => scale,
         destroy() {
+            clearMarquee();
             opts.viewport.removeEventListener("wheel", onWheel);
             opts.viewport.removeEventListener("mousedown", onPanStart, true);
+            opts.viewport.removeEventListener("mousedown", onBoxStart, true);
             opts.viewport.removeEventListener("click", onClickCapture, true);
             document.removeEventListener("mousemove", onPanMove);
+            document.removeEventListener("mousemove", onBoxMove);
             document.removeEventListener("mouseup", onPanEnd);
+            document.removeEventListener("mouseup", onBoxEnd);
             window.removeEventListener("blur", onPanEnd);
+            window.removeEventListener("blur", clearMarquee);
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
         },

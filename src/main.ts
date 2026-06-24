@@ -49,6 +49,7 @@ const zoomSlider = document.getElementById("zoomSlider") as HTMLInputElement;
 const zoomResetBtn = document.getElementById("zoomResetBtn") as HTMLButtonElement;
 const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
+const boxZoomToggleBtn = document.getElementById("boxZoomToggleBtn") as HTMLButtonElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
 const labelPalette = document.getElementById("labelPalette") as HTMLElement;
 const statusMsg = document.getElementById("statusMsg") as HTMLElement;
@@ -174,12 +175,24 @@ function setPanMode(on: boolean) {
     zoom.setPanMode(on);
     panToggleBtn.classList.toggle("active", on);
     panToggleBtn.setAttribute("aria-pressed", String(on));
+    // Pan and box-zoom are mutually exclusive tools.
+    if (on) setBoxZoomMode(false);
+}
+
+function setBoxZoomMode(on: boolean) {
+    zoom.setBoxZoomMode(on);
+    boxZoomToggleBtn.classList.toggle("active", on);
+    boxZoomToggleBtn.setAttribute("aria-pressed", String(on));
+    if (on) setPanMode(false);
 }
 
 zoomSlider.addEventListener("input", () => zoom.setScale(parseFloat(zoomSlider.value)));
 zoomResetBtn.addEventListener("click", () => zoom.reset());
 panToggleBtn.addEventListener("click", () =>
     setPanMode(!panToggleBtn.classList.contains("active"))
+);
+boxZoomToggleBtn.addEventListener("click", () =>
+    setBoxZoomMode(!boxZoomToggleBtn.classList.contains("active"))
 );
 
 // Re-fit the frame to the window so it keeps filling the row on resize.
@@ -422,6 +435,10 @@ async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null
     initialLoading.style.display = "none";
     zoom.reset();
     zoomSlider.disabled = false;
+    // Box-zoom works from 1:1 (its job is to magnify a chosen region), so
+    // it's available as soon as a frame is shown — unlike pan, which only
+    // matters once zoomed in.
+    boxZoomToggleBtn.disabled = false;
 
     setControlsEnabled(true);
 
