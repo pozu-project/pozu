@@ -325,6 +325,7 @@ h1 {
 #newFrameBtn {
     background: #0ea5e9;
     color: white;
+    border: 2px solid transparent;
 }
 
 #downloadBtn {
