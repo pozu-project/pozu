@@ -52,7 +52,6 @@ const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
 const labelPalette = document.getElementById("labelPalette") as HTMLElement;
-const frameInfo = document.getElementById("frameInfo") as HTMLElement;
 const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
@@ -289,7 +288,6 @@ function showStatus(type: "info" | "success" | "error", message: string) {
 async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null>) {
     if (!videoModel) return;
     setControlsEnabled(false);
-    frameInfo.textContent = `Decoding frame ${idx}…`;
 
     const bitmap = await (bitmapPromise ?? videoModel.video.getFrame(idx));
     if (bitmap == null) {
@@ -327,8 +325,6 @@ async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null
     zoom.reset();
     zoomSlider.disabled = false;
 
-    frameInfo.textContent =
-        `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;
     setControlsEnabled(true);
 
     // Current frame is painted; the `<video>` is now free to seek ahead.

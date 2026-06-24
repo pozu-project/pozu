@@ -329,15 +329,6 @@ h1 {
     color: white;
 }
 
-.frame-info {
-    font-family: monospace;
-    font-size: 0.85rem;
-    color: #cbd5e1;
-    padding: 4px 12px;
-    background: #0b1220;
-    border-radius: 4px;
-}
-
 .main-container {
     display: flex;
     gap: 20px;

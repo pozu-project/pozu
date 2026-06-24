@@ -61,7 +61,6 @@ const zoomResetBtn = document.getElementById("zoomResetBtn") as HTMLButtonElemen
 const zoomLevel = document.getElementById("zoomLevel") as HTMLElement;
 const panToggleBtn = document.getElementById("panToggleBtn") as HTMLButtonElement;
 const initialLoading = document.getElementById("initialLoading") as HTMLElement;
-const frameInfo = document.getElementById("frameInfo") as HTMLElement;
 const statusMsg = document.getElementById("statusMsg") as HTMLElement;
 const newFrameBtn = document.getElementById("newFrameBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
@@ -228,7 +227,6 @@ window.addEventListener("blur", commitDrag);
 async function showFrame(idx: number) {
     if (!videoModel) return;
     setControlsEnabled(false);
-    frameInfo.textContent = `Decoding frame ${idx}…`;
 
     const bitmap = await videoModel.video.getFrame(idx);
     if (bitmap == null) {
@@ -266,8 +264,6 @@ async function showFrame(idx: number) {
     zoom.reset();
     zoomSlider.disabled = false;
 
-    frameInfo.textContent =
-        `Frame ${idx} / ${meta.totalFrames}  ` + `(${w}×${h} @ ${meta.fps.toFixed(2)} fps)`;
     updateBoxUI();
     setControlsEnabled(true);
 }
