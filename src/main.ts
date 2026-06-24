@@ -1,6 +1,6 @@
 /**
  * Boot script for the labeling page. Wires together the DOM, the
- * labeler module, and the sleap-io.js-backed video loader.
+ * labeler module, and the HTML5 `<video>`-backed video loader.
  */
 import "./styles.css";
 import { createLabeler } from "./labeler.js";
@@ -9,6 +9,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
+import { initAuthControl, renderAuthControl, isSignedIn, AuthError } from "./auth.js";
 
 // ---- Diagnostics ----
 // Surface module-evaluation / async errors directly into the loading
@@ -76,7 +77,7 @@ const VIEW_MODE_NAMES: Record<ViewMode, string> = {
 };
 
 // Mark the overlay so we can verify the bundle actually loaded.
-setStage("Booting pozu… (loading sleap-io.js bundle)");
+setStage("Booting pozu… (loading video)");
 
 // ---- App state ----
 let videoModel: VideoModel | null = null;
@@ -348,6 +349,11 @@ async function doFocusSubmit() {
     const meta = getVideoMeta();
     if (!meta) return;
 
+    if (!isSignedIn()) {
+        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
+        return;
+    }
+
     const payload = buildPayload({
         videoUrl: VIDEO_URL,
         frameIndex,
@@ -360,6 +366,12 @@ async function doFocusSubmit() {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Focus submit failed:", err);
+        if (err instanceof AuthError) {
+            renderAuthControl();
+            showStatus("error", err.message);
+            setControlsEnabled(true);
+            return;
+        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit: ${msg}`);
         setControlsEnabled(true);
@@ -405,6 +417,11 @@ downloadBtn.addEventListener("click", async () => {
         return;
     }
 
+    if (!isSignedIn()) {
+        showStatus("error", "Please sign in with GitHub (top-right) to submit.");
+        return;
+    }
+
     const meta = getVideoMeta();
     if (!meta) {
         showStatus("error", "Video metadata unavailable. Load a frame and try again.");
@@ -423,6 +440,12 @@ downloadBtn.addEventListener("click", async () => {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Label JSON submission failed:", err);
+        if (err instanceof AuthError) {
+            renderAuthControl();
+            showStatus("error", err.message);
+            setControlsEnabled(true);
+            return;
+        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit labels: ${msg}`);
         setControlsEnabled(true);
@@ -457,6 +480,7 @@ if (initialHash && initialHash in VIEW_MODE_NAMES) {
 }
 
 buildFocusPicker();
+initAuthControl();
 
 // ---- Boot ----
 (async () => {
@@ -466,7 +490,7 @@ buildFocusPicker();
     } catch (err) {
         console.error(err);
         const msg = (err as Error).message;
-        initialLoading.textContent = `❌ Failed to load video via sleap-io.js: ${msg}. Click 🚫 No Subject Present to retry.`;
+        initialLoading.textContent = `❌ Failed to load video: ${msg}. Click 🚫 No Subject Present to retry.`;
         showStatus("error", msg);
         // Re-enable controls so the user can retry instead of being
         // permanently stuck on the loading overlay.

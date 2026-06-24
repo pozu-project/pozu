@@ -1,0 +1,13 @@
+# Upcoming
+
+- Replaced the GitHub icon on the sign-in button with a plain "Sign in" label; clicking it now
+  opens a modal to pick a sign-in method (GitHub only for now) instead of navigating straight to
+  the GitHub flow.
+- Collapsed the auth nav control into a single button that morphs between "Sign in" and the
+  signed-in user (click to sign out), replaced the Center for Open Neuroscience badge SVG with a
+  PNG, widened the app content, and removed the last stale `sleap-io.js` references from the boot
+  and error messaging.
+- Added GitHub OAuth sign-in. A "Sign in with GitHub" control in the top nav starts the
+  backend-driven OAuth flow; the returned JWT is captured from the URL fragment, stored, and
+  replayed as an `Authorization: Bearer` header on annotation submissions. Signing in is now
+  required to submit, and expired sessions (HTTP 401) prompt re-login.

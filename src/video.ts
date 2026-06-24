@@ -1,27 +1,12 @@
 /**
  * HTML5 `<video>`-backed video model.
  *
- * Earlier revisions tried to use `@talmolab/sleap-io.js`'s `loadVideo`:
- *
- *  - The default backend selection falls back to the HTML5 `<video>`
- *    backend when the URL has no `.mp4` extension (as is the case for
- *    the EMBER S3 blob), and that backend doesn't populate `shape` or
- *    implement `getFrameTimes()`.
- *  - Forcing `backend: "mp4box"` makes `loadVideo` succeed but
- *    `getFrameTimes()` then sits on `await this.ready`, which only
- *    resolves once mp4box has parsed the moov atom. For files where
- *    moov is at the end (as for the EMBER clip), mp4box must walk the
- *    whole file via successive chunk reads — for a video this large,
- *    that exceeds any sensible boot timeout and the user sees the
- *    loading overlay hang forever.
- *
- * The original [`pozoo`](https://github.com/CodyCBakerPhD/pozoo)
- * proof-of-concept uses a plain HTML5 `<video>` element with
- * `currentTime` seeking + `drawImage`, and that's been verified to work
- * against the same EMBER URL. We do the same here. The sleap-io.js
- * data model (`Skeleton`, `Labels`, `Instance`) is still used by
- * `src/payload.ts` for export — only the video decoding step is now
- * driven directly by the browser.
+ * Frames are extracted with a plain HTML5 `<video>` element via
+ * `currentTime` seeking + `drawImage` onto an offscreen canvas — the
+ * same approach as the original
+ * [`pozoo`](https://github.com/CodyCBakerPhD/pozoo) proof-of-concept,
+ * verified against the EMBER S3 clip below. The export payload is
+ * assembled separately as plain JSON in `src/payload.ts`.
  */
 import type { VideoMeta } from "./payload.js";
 
