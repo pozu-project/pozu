@@ -26,6 +26,22 @@ function addDevMode(href: string): string {
 
 export function initDevMode(): void {
     const devModeLink = document.querySelector<HTMLAnchorElement>(".top-nav-devmode-link");
+    const file = window.location.pathname.split("/").pop() ?? "";
+    const params = new URLSearchParams(window.location.search);
+
+    // Always point the Dev Mode button at the current page, toggling the param.
+    if (devModeLink) {
+        if (DEV_MODE) {
+            params.delete("dev-mode");
+            const query = params.toString();
+            devModeLink.href = file + (query ? `?${query}` : "");
+        } else {
+            params.set("dev-mode", "");
+            // Produce "page.html?dev-mode" without a trailing "=".
+            const query = params.toString().replace("dev-mode=", "dev-mode");
+            devModeLink.href = file + "?" + query;
+        }
+    }
 
     if (!DEV_MODE) return;
 
@@ -44,15 +60,8 @@ export function initDevMode(): void {
         }
     }
 
-    // Dev Mode button: mark active and point to the current page without the param (toggle off).
-    if (devModeLink) {
-        devModeLink.classList.add("active");
-        const params = new URLSearchParams(window.location.search);
-        params.delete("dev-mode");
-        const query = params.toString();
-        const file = window.location.pathname.split("/").pop() ?? "";
-        devModeLink.href = file + (query ? `?${query}` : "");
-    }
+    // Mark button active now that we know we're in dev-mode.
+    devModeLink?.classList.add("active");
 
     // Inject the JSON payload preview panel at the bottom of <main>.
     const panel = document.createElement("div");
