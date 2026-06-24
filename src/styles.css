@@ -468,17 +468,34 @@ h1 {
     display: none;
 }
 
-.frame-row {
-    display: flex;
-    align-items: stretch;
+.canvas-col {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
     gap: 12px;
 }
 
-.canvas-col {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-width: 0;
+.canvas-col .canvas-viewport {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.canvas-col .zoom-rail {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.canvas-col .bottom-actions {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0;
+}
+
+.canvas-col .demo-controls,
+.canvas-col #statusMsg {
+    grid-column: 1;
+    grid-row: 3;
+    margin-top: 0;
 }
 
 /* Vertical zoom control to the right of the frame. */
