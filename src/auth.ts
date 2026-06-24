@@ -33,14 +33,6 @@ export interface AuthUser {
     exp?: number;
 }
 
-/** Thrown when the backend rejects the JWT (expired or invalid). */
-export class AuthError extends Error {
-    constructor(message = "Your session has expired — please sign in with GitHub again.") {
-        super(message);
-        this.name = "AuthError";
-    }
-}
-
 /**
  * Decode a JWT payload for display only — the signature is NOT verified
  * (that is the backend's job). Returns null for anything that isn't a

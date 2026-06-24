@@ -18,7 +18,7 @@ import { createZoomController } from "./zoom.js";
 import { pickRandomFrame, type VideoMeta } from "./payload.js";
 import { buildBoxPayload, normaliseBox, clampBox, type Box } from "./box-payload.js";
 import { submitBoxPayload } from "./box-api.js";
-import { initAuthControl, renderAuthControl, notifyAuthChange, AuthError } from "./auth.js";
+import { initAuthControl } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -336,12 +336,6 @@ downloadBtn.addEventListener("click", async () => {
         await submitBoxPayload(payload);
     } catch (err) {
         console.error("Box JSON submission failed:", err);
-        if (err instanceof AuthError) {
-            renderAuthControl();
-            notifyAuthChange();
-            showStatus("error", err.message);
-            return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showIssueModal(
             `Something went wrong while submitting this annotation (${msg}). Please submit an issue at the GitHub issues link below.`

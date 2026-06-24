@@ -9,7 +9,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
-import { initAuthControl, renderAuthControl, notifyAuthChange, AuthError } from "./auth.js";
+import { initAuthControl } from "./auth.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent =
@@ -362,12 +362,6 @@ async function doFocusSubmit() {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Focus submit failed:", err);
-        if (err instanceof AuthError) {
-            renderAuthControl();
-            notifyAuthChange();
-            showStatus("error", err.message);
-            return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit: ${msg}`);
         setControlsEnabled(true);
@@ -428,12 +422,6 @@ downloadBtn.addEventListener("click", async () => {
         await submitLabelPayload(payload);
     } catch (err) {
         console.error("Label JSON submission failed:", err);
-        if (err instanceof AuthError) {
-            renderAuthControl();
-            notifyAuthChange();
-            showStatus("error", err.message);
-            return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showStatus("error", `Failed to submit labels: ${msg}`);
         setControlsEnabled(true);
