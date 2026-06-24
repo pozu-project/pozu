@@ -276,9 +276,9 @@ async function initDemoFrames() {
 }
 
 function setControlsEnabled(enabled: boolean) {
-    newFrameBtn.disabled = !enabled;
+    // In dev-mode newFrameBtn and downloadBtn are permanently disabled.
+    if (!DEV_MODE) newFrameBtn.disabled = !enabled;
     resetBtn.disabled = !enabled;
-    // In dev-mode the submit button is permanently disabled.
     if (!DEV_MODE) downloadBtn.disabled = !enabled;
 }
 
@@ -652,8 +652,10 @@ initAuthControl();
 // ---- Boot ----
 (async () => {
     if (isSignedIn()) {
-        newFrameBtn.hidden = false;
+        // In dev-mode the no-subject and submit buttons stay permanently disabled.
+        if (!DEV_MODE) newFrameBtn.hidden = false;
         downloadBtn.hidden = false;
+        if (DEV_MODE) downloadBtn.disabled = true;
     }
     try {
         await ensureVideoModel();
