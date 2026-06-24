@@ -282,11 +282,16 @@ h1 {
     justify-content: center;
 }
 
+.controls button:not([hidden]),
+.bottom-actions button:not([hidden]),
+#resetBtn:not([hidden]) {
+    display: block;
+    margin: 0 auto;
+}
+
 .controls button,
 .bottom-actions button,
 #resetBtn {
-    display: block;
-    margin: 0 auto;
     padding: 8px 18px;
     border: none;
     border-radius: 6px;
