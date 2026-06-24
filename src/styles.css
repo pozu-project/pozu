@@ -350,7 +350,10 @@ h1 {
     gap: 20px;
     align-items: flex-start;
     margin-top: 16px;
-    flex-wrap: wrap;
+    /* Keep the frame and the skeleton node selector on one row: the sidebar
+       stays fixed to the right of the frame rather than wrapping beneath it as
+       the window shrinks (the frame is sized in JS to leave room for it). */
+    flex-wrap: nowrap;
     justify-content: center;
     padding: 0 16px;
 }
@@ -610,7 +613,11 @@ canvas {
 }
 
 .sidebar {
+    /* Width is driven by the JS layout (fitCanvasToViewport): it shrinks
+       alongside the frame as the window narrows. `flex-shrink: 0` keeps flexbox
+       from shrinking it further, so it never wraps beneath the frame. */
     width: 300px;
+    flex-shrink: 0;
     background: #111827;
     border-radius: 8px;
     padding: 16px;

@@ -63,6 +63,7 @@ const labelView = document.getElementById("labelView") as HTMLElement;
 const comingSoonView = document.getElementById("comingSoonView") as HTMLElement;
 const comingSoonModeName = document.getElementById("comingSoonModeName") as HTMLElement;
 const binaryDemo = document.getElementById("binaryDemo") as HTMLElement;
+const sidebar = document.querySelector(".sidebar") as HTMLElement | null;
 const labelSidebarContent = document.getElementById("labelSidebarContent") as HTMLElement;
 const focusSidebarContent = document.getElementById("focusSidebarContent") as HTMLElement;
 const focusKeypointSelect = document.getElementById("focusKeypointSelect") as HTMLSelectElement;
@@ -290,33 +291,57 @@ function showStatus(type: "info" | "success" | "error", message: string) {
 // ---- Frame sizing ----
 // Keep in sync with `.view-shell` / `.top-nav-inner` max-width in styles.css.
 const SHELL_MAX_WIDTH = 2288;
-// Horizontal space in the label row the frame can't use: shell padding, the
-// 300px sidebar, the zoom rail, and the gaps between them.
-const FRAME_RESERVED_WIDTH = 420;
+// Fixed horizontal chrome on the label row: shell padding (40), container
+// padding (32), the zoom rail (40), and the two gaps (12 + 20). Whatever's left
+// is shared between the frame and the sidebar.
+const ROW_CHROME = 144;
 // Vertical space outside the frame: the top nav, shell padding, and the
 // controls below the frame. Keeps the frame from overflowing the window height.
 const FRAME_RESERVED_HEIGHT = 220;
-const MIN_FRAME_WIDTH = 360;
+const MIN_FRAME_WIDTH = 300;
+const SIDEBAR_MAX_WIDTH = 300;
+const SIDEBAR_MIN_WIDTH = 150;
 // The EMBER frames are only 960×540, so filling a wide window means upscaling.
 // Cap it so the frame doesn't get unusably soft on very large monitors.
 const MAX_FRAME_SCALE = 2;
 
-// Scale the frame to fill the available viewport box — both width and height,
-// upscaling past native resolution when there's room — so it fills the screen
-// instead of sitting at a fixed size.
+const clampW = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
+
+// Lay out the frame and the skeleton node selector on one row. The frame fills
+// the available viewport box (width and height, upscaling when there's room);
+// when the window is too narrow to hold both at full size, the frame and the
+// sidebar shrink together — the sidebar tracks the frame and never wraps below.
 function fitCanvasToViewport(): void {
     if (!videoModel) return;
     const { width: w, height: h } = videoModel.meta;
     if (!w || !h) return;
-    const availW = Math.max(
-        MIN_FRAME_WIDTH,
-        Math.min(window.innerWidth, SHELL_MAX_WIDTH) - 40 - FRAME_RESERVED_WIDTH
-    );
     const availH = Math.max(240, window.innerHeight - FRAME_RESERVED_HEIGHT);
-    const scale = Math.min(availW / w, availH / h, MAX_FRAME_SCALE);
+    // Width shared between the frame and the sidebar.
+    const usable = Math.max(
+        MIN_FRAME_WIDTH,
+        Math.min(window.innerWidth, SHELL_MAX_WIDTH) - ROW_CHROME
+    );
+    // The frame's preferred width when only height / max upscale constrain it.
+    const frameCap = Math.min(w * MAX_FRAME_SCALE, (availH / h) * w);
+
+    let sidebarW = SIDEBAR_MAX_WIDTH;
+    let frameW = frameCap;
+    if (frameCap + SIDEBAR_MAX_WIDTH > usable) {
+        // Not enough room for both at full size: shrink them together, keeping
+        // the frame-to-sidebar ratio so the sidebar scales with the frame.
+        sidebarW = clampW(
+            (usable * SIDEBAR_MAX_WIDTH) / (frameCap + SIDEBAR_MAX_WIDTH),
+            SIDEBAR_MIN_WIDTH,
+            SIDEBAR_MAX_WIDTH
+        );
+        frameW = clampW(usable - sidebarW, MIN_FRAME_WIDTH, frameCap);
+    }
+
+    const scale = frameW / w;
     displayScale = scale;
-    canvas.style.width = `${w * scale}px`;
+    canvas.style.width = `${frameW}px`;
     canvas.style.height = `${h * scale}px`;
+    if (sidebar) sidebar.style.width = `${sidebarW}px`;
 }
 
 async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null>) {
