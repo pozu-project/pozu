@@ -520,11 +520,13 @@ initAuthControl();
 
 // ---- Boot ----
 (async () => {
+    if (isSignedIn()) {
+        newFrameBtn.hidden = false;
+        downloadBtn.hidden = false;
+    }
     try {
         await ensureVideoModel();
         if (isSignedIn()) {
-            newFrameBtn.hidden = false;
-            downloadBtn.hidden = false;
             await loadRandomFrame();
         } else {
             enterDemoMode();
@@ -535,10 +537,6 @@ initAuthControl();
         const msg = (err as Error).message;
         initialLoading.textContent = `❌ Failed to load video: ${msg}. Click 🚫 No Subject Present to retry.`;
         showStatus("error", msg);
-        if (isSignedIn()) {
-            newFrameBtn.hidden = false;
-            downloadBtn.hidden = false;
-        }
         setControlsEnabled(true);
     }
 })();
