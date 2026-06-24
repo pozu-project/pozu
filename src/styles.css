@@ -349,11 +349,15 @@ h1 {
 }
 
 .demo-controls {
+    display: none;
     margin-top: 12px;
-    display: flex;
     gap: 16px;
     align-items: center;
     justify-content: center;
+}
+
+.demo-controls:not([hidden]) {
+    display: flex;
 }
 
 .demo-arrow {
