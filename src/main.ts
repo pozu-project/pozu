@@ -436,10 +436,6 @@ async function showFrame(idx: number, bitmapPromise?: Promise<ImageBitmap | null
             {
                 video_url: VIDEO_URL,
                 frame_index: frameIndex,
-                total_frames: meta?.totalFrames,
-                fps: meta?.fps,
-                frame_width: meta?.width,
-                frame_height: meta?.height,
                 timestamp: "<time of submission>",
                 reason: "<selected at submit>",
                 details: "<optional>",
@@ -551,10 +547,6 @@ reportFrameSubmitBtn.addEventListener("click", async () => {
         await submitFrameReport({
             video_url: VIDEO_URL,
             frame_index: frameIndex,
-            total_frames: videoModel?.meta.totalFrames,
-            fps: videoModel?.meta.fps,
-            frame_width: videoModel?.meta.width,
-            frame_height: videoModel?.meta.height,
             timestamp: new Date().toISOString(),
             reason,
             details: details || undefined,

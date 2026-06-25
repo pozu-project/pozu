@@ -6,10 +6,6 @@ export const FRAME_REPORT_API_URL =
 export interface FrameReportPayload {
     video_url: string;
     frame_index: number;
-    total_frames?: number;
-    fps?: number;
-    frame_width?: number;
-    frame_height?: number;
     timestamp?: string;
     reason: string;
     details?: string;
