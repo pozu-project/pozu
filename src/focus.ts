@@ -10,6 +10,7 @@ import { loadVideoModel, refreshTotalFrames, VIDEO_URL, type VideoModel } from "
 import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { submitFrameReport } from "./report-api.js";
+import { submitNoSubjectPayload } from "./no-subject-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
 import { initAuthControl, isSignedIn, onAuthChange } from "./auth.js";
 import { DEV_MODE, initDevMode, updateDevModeJson, updateDevModeFlagJson } from "./dev-mode.js";
@@ -522,6 +523,10 @@ reportFrameSubmitBtn.addEventListener("click", async () => {
 });
 
 newFrameBtn.addEventListener("click", () => {
+    submitNoSubjectPayload({ video_url: VIDEO_URL, frame_index: frameIndex }).catch((err: Error) => {
+        console.error("[pozu] no-subject submission failed:", err);
+        showStatus("error", `Failed to record no-subject: ${err.message}`);
+    });
     loadRandomFrame().catch((err: Error) => {
         console.error(err);
         const msg = err?.message ?? String(err);
