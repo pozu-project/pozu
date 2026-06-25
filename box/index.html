@@ -4,9 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Pozu — Box Selection</title>
-      <script type="module" crossorigin src="../assets/box-DdTzvoub.js"></script>
-      <link rel="modulepreload" crossorigin href="../assets/dev-mode-BucbxQDO.js">
-      <link rel="stylesheet" crossorigin href="../assets/dev-mode-DQ2j3mSB.css">
+      <script type="module" crossorigin src="../assets/box-CjxyNnUK.js"></script>
+      <link rel="modulepreload" crossorigin href="../assets/dev-mode-Cc2R-fDQ.js">
+      <link rel="stylesheet" crossorigin href="../assets/dev-mode-_LMq4zbt.css">
     </head>
     <body>
         <header class="top-nav">
@@ -149,7 +149,10 @@
                                 </button>
                             </div>
                             <div class="bottom-actions">
-                                <button id="newFrameBtn" disabled>🚫 No Subject Present</button>
+                                <div class="frame-flag-group">
+                                    <button id="reportFrameBtn" disabled>🚩 Report Frame</button>
+                                    <button id="newFrameBtn" disabled>🚫 No Subject Present</button>
+                                </div>
                                 <button id="resetBtn" disabled>🔄 Reset Box</button>
                                 <button id="downloadBtn" disabled>📤 Submit</button>
                             </div>
@@ -177,6 +180,23 @@
                 </form>
             </dialog>
         </main>
+
+        <dialog id="reportFrameModal" class="report-modal" aria-labelledby="reportFrameModalTitle">
+            <h2 id="reportFrameModalTitle">Report Frame</h2>
+            <p class="report-modal-hint">Flag this frame as inappropriate or problematic.</p>
+            <fieldset class="report-reasons">
+                <legend class="sr-only">Reason for reporting</legend>
+                <label class="report-reason"><input type="radio" name="reportReason" value="inappropriate_content" /> Inappropriate content</label>
+                <label class="report-reason"><input type="radio" name="reportReason" value="graphic_or_violent" /> Graphic or violent content</label>
+                <label class="report-reason"><input type="radio" name="reportReason" value="corrupted_frame" /> Corrupted or glitched frame</label>
+                <label class="report-reason"><input type="radio" name="reportReason" value="other" /> Other</label>
+            </fieldset>
+            <textarea id="reportFrameDetails" class="report-details" placeholder="Describe the issue…" rows="3" hidden></textarea>
+            <div class="report-modal-actions">
+                <button type="button" class="report-modal-cancel" id="reportFrameCancelBtn">Cancel</button>
+                <button type="button" class="report-modal-submit" id="reportFrameSubmitBtn">Submit Report</button>
+            </div>
+        </dialog>
 
         <dialog id="signInModal" class="signin-modal" aria-labelledby="signInModalTitle">
             <h2 id="signInModalTitle">Sign in</h2>

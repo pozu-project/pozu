@@ -4,10 +4,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Pozu — Focus</title>
-      <script type="module" crossorigin src="../assets/focus-CVwbu5nF.js"></script>
-      <link rel="modulepreload" crossorigin href="../assets/dev-mode-BucbxQDO.js">
-      <link rel="modulepreload" crossorigin href="../assets/label-api-DXs47nTj.js">
-      <link rel="stylesheet" crossorigin href="../assets/dev-mode-DQ2j3mSB.css">
+      <script type="module" crossorigin src="../assets/focus-DNhSaOJP.js"></script>
+      <link rel="modulepreload" crossorigin href="../assets/dev-mode-Cc2R-fDQ.js">
+      <link rel="modulepreload" crossorigin href="../assets/no-subject-api-CvqjUK0G.js">
+      <link rel="stylesheet" crossorigin href="../assets/dev-mode-_LMq4zbt.css">
     </head>
     <body>
         <header class="top-nav">
@@ -139,7 +139,10 @@
                                 </button>
                             </div>
                             <div class="bottom-actions">
-                                <button id="newFrameBtn" disabled hidden>🚫 No Subject Present</button>
+                                <div class="frame-flag-group">
+                                    <button id="reportFrameBtn" disabled hidden>🚩 Report Frame</button>
+                                    <button id="newFrameBtn" disabled hidden>🚫 No Subject Present</button>
+                                </div>
                             </div>
                             <div class="demo-controls" id="demoControls" hidden>
                                 <button id="demoPrevBtn" type="button" class="demo-arrow" aria-label="Previous frame" disabled>&#8592;</button>
@@ -164,6 +167,23 @@
                 </div>
             </section>
         </main>
+
+        <dialog id="reportFrameModal" class="report-modal" aria-labelledby="reportFrameModalTitle">
+            <h2 id="reportFrameModalTitle">Report Frame</h2>
+            <p class="report-modal-hint">Flag this frame as inappropriate or problematic.</p>
+            <fieldset class="report-reasons">
+                <legend class="sr-only">Reason for reporting</legend>
+                <label class="report-reason"><input type="radio" name="reportReason" value="inappropriate_content" /> Inappropriate content</label>
+                <label class="report-reason"><input type="radio" name="reportReason" value="graphic_or_violent" /> Graphic or violent content</label>
+                <label class="report-reason"><input type="radio" name="reportReason" value="corrupted_frame" /> Corrupted or glitched frame</label>
+                <label class="report-reason"><input type="radio" name="reportReason" value="other" /> Other</label>
+            </fieldset>
+            <textarea id="reportFrameDetails" class="report-details" placeholder="Describe the issue…" rows="3" hidden></textarea>
+            <div class="report-modal-actions">
+                <button type="button" class="report-modal-cancel" id="reportFrameCancelBtn">Cancel</button>
+                <button type="button" class="report-modal-submit" id="reportFrameSubmitBtn">Submit Report</button>
+            </div>
+        </dialog>
 
         <dialog id="signInModal" class="signin-modal" aria-labelledby="signInModalTitle">
             <h2 id="signInModalTitle">Sign in</h2>
