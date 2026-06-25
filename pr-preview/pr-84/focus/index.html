@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Pozu — Focus</title>
+      <script type="module" crossorigin src="../assets/focus-CVwbu5nF.js"></script>
+      <link rel="modulepreload" crossorigin href="../assets/dev-mode-BucbxQDO.js">
+      <link rel="modulepreload" crossorigin href="../assets/label-api-DXs47nTj.js">
+      <link rel="stylesheet" crossorigin href="../assets/dev-mode-DQ2j3mSB.css">
+    </head>
+    <body>
+        <header class="top-nav">
+            <div class="top-nav-inner">
+                <a class="top-nav-brand" href="../label/" aria-label="Pozu home">
+                    <img
+                        class="top-nav-logo"
+                        src="../assets/pozu-logo-CFlbegVO.svg"
+                        alt=""
+                        aria-hidden="true"
+                    />
+                    <span>Pozu</span>
+                </a>
+                <nav class="top-nav-links" aria-label="View modes">
+                    <div class="nav-section nav-section--label">
+                        <span class="nav-section-title">Label</span>
+                        <div class="nav-section-tabs">
+                            <a class="top-nav-link active" href="../focus/" aria-current="page">Focus</a>
+                            <a class="top-nav-link" href="../label/">Full Skeleton</a>
+                            <a class="top-nav-link" href="../box/">Box</a>
+                        </div>
+                    </div>
+                    <div class="nav-section nav-section--train">
+                        <span class="nav-section-title">Train</span>
+                        <div class="nav-section-tabs">
+                            <button class="top-nav-link" type="button" disabled>Models</button>
+                            <button class="top-nav-link" type="button" disabled>Inference</button>
+                        </div>
+                    </div>
+                    <div class="nav-section nav-section--curate">
+                        <span class="nav-section-title">Curate</span>
+                        <div class="nav-section-tabs">
+                            <a class="top-nav-link" href="../label/#binary" data-always-disabled aria-disabled="true" tabindex="-1">Binary</a>
+                            <a class="top-nav-link" href="../label/#track" data-always-disabled aria-disabled="true" tabindex="-1">Track</a>
+                        </div>
+                    </div>
+                </nav>
+                <div class="top-nav-devmode">
+                    <a class="top-nav-devmode-link" href="?dev-mode">Dev Mode</a>
+                </div>
+                <div class="top-nav-auth" id="authControl">
+                    <button
+                        class="auth-signin"
+                        id="authBtn"
+                        type="button"
+                        title="Sign in"
+                        aria-label="Sign in"
+                    >
+                        <img class="auth-avatar" id="authAvatar" alt="" hidden />
+                        <span class="auth-label" id="authLabel">Sign in</span>
+                    </button>
+                </div>
+                <a
+                    class="top-nav-github"
+                    href="https://github.com/CodyCBakerPhD/pozu"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View source on GitHub"
+                >
+                    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                        />
+                    </svg>
+                </a>
+            </div>
+        </header>
+
+        <main class="view-shell">
+            <section id="focusView">
+                <div class="main-container">
+                    <div>
+                        <div class="canvas-col">
+                            <div class="canvas-viewport" id="canvasViewport">
+                                <div class="loading-fullscreen" id="initialLoading">
+                                    <div class="spinner"></div>
+                                    Loading frame...
+                                </div>
+                                <div
+                                    class="canvas-container"
+                                    id="canvasContainer"
+                                    style="display: none"
+                                >
+                                    <canvas id="frameCanvas"></canvas>
+                                </div>
+                            </div>
+                            <div class="zoom-rail">
+                                <span id="zoomLevel" class="zoom-readout">100%</span>
+                                <input
+                                    id="zoomSlider"
+                                    class="zoom-slider"
+                                    type="range"
+                                    min="1"
+                                    max="8"
+                                    step="0.05"
+                                    value="1"
+                                    orient="vertical"
+                                    aria-label="Zoom level"
+                                    disabled
+                                />
+                                <button
+                                    id="zoomResetBtn"
+                                    class="zoom-fit"
+                                    type="button"
+                                    title="Reset zoom (0)"
+                                    disabled
+                                >
+                                    ⤢
+                                </button>
+                                <button
+                                    id="boxZoomToggleBtn"
+                                    class="tool-toggle zoom-fit"
+                                    type="button"
+                                    title="Zoom to selection — drag a box around the area to magnify"
+                                    aria-pressed="false"
+                                    disabled
+                                >
+                                    <svg class="tool-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1" /></svg>
+                                </button>
+                                <button
+                                    id="panToggleBtn"
+                                    class="tool-toggle zoom-fit"
+                                    type="button"
+                                    title="Toggle pan mode — drag to move the frame"
+                                    aria-pressed="false"
+                                    disabled
+                                >
+                                    <svg class="tool-icon icon-pan" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21" /><line x1="3" y1="12" x2="21" y2="12" /><polyline points="9 6 12 3 15 6" /><polyline points="9 18 12 21 15 18" /><polyline points="6 9 3 12 6 15" /><polyline points="18 9 21 12 18 15" /></svg>
+                                </button>
+                            </div>
+                            <div class="bottom-actions">
+                                <button id="newFrameBtn" disabled hidden>🚫 No Subject Present</button>
+                            </div>
+                            <div class="demo-controls" id="demoControls" hidden>
+                                <button id="demoPrevBtn" type="button" class="demo-arrow" aria-label="Previous frame" disabled>&#8592;</button>
+                                <span id="demoCounter" class="demo-counter">1 / 10</span>
+                                <button id="demoNextBtn" type="button" class="demo-arrow" aria-label="Next frame" disabled>&#8594;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar">
+                        <div id="focusSidebarContent">
+                            <h2>🎯 Focus Mode</h2>
+                            <label class="sidebar-hint" for="focusKeypointSelect"
+                                >Keypoint to label (one at a time):</label
+                            >
+                            <select class="focus-keypoint-select" id="focusKeypointSelect"></select>
+                            <div class="focus-count" id="focusCount">Frames labeled: 0</div>
+                        </div>
+
+                        <div id="statusMsg"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <dialog id="signInModal" class="signin-modal" aria-labelledby="signInModalTitle">
+            <h2 id="signInModalTitle">Sign in</h2>
+            <p class="signin-modal-hint">Choose a sign-in method to continue.</p>
+            <div class="signin-methods">
+                <button class="signin-method" id="signInGitHubBtn" type="button">
+                    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+                        />
+                    </svg>
+                    <span>Continue with GitHub</span>
+                </button>
+            </div>
+            <form method="dialog" class="signin-modal-actions">
+                <button class="signin-modal-cancel" value="cancel">Cancel</button>
+            </form>
+        </dialog>
+
+        <span class="version-badge" id="versionBadge"></span>
+
+        <a
+            class="con-badge"
+            href="https://centerforopenneuroscience.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Center for Open Neuroscience"
+        >
+            <img
+                class="con-badge-logo"
+                src="../assets/con-logo-F8_OuRqh.png"
+                alt="Center for Open Neuroscience"
+            />
+        </a>
+
+    </body>
+</html>
