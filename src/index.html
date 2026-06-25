@@ -3,8 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="refresh" content="0; url=./label/" />
         <title>Pozu</title>
+        <script>
+            // Preserve the hash (which carries the OAuth token fragment) when
+            // redirecting to the label page.
+            window.location.replace("./label/" + window.location.search + window.location.hash);
+        </script>
     </head>
     <body>
         <p>Redirecting to <a href="./label/">Pozu</a>…</p>
