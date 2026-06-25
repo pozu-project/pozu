@@ -10,9 +10,12 @@ import { buildPayload, pickRandomFrame, type VideoMeta } from "./payload.js";
 import { submitLabelPayload } from "./label-api.js";
 import { LABEL_DEFINITIONS } from "./skeleton.js";
 import { initAuthControl, isSignedIn, onAuthChange } from "./auth.js";
+import { DEV_MODE, initDevMode, updateDevModeJson } from "./dev-mode.js";
 
 // ---- Version badge ----
 (document.getElementById("versionBadge") as HTMLElement).textContent = `v${__APP_VERSION__}`;
+
+initDevMode();
 
 // ---- Diagnostics ----
 // Surface module-evaluation / async errors directly into the loading
@@ -216,7 +219,15 @@ labeler.onChange(() => {
     const added = size > prevPlacedSize;
     prevPlacedSize = size;
     updateSubmitReadyState();
-    if (focusModeActive && added && labeler.placed.has(focusNodeId) && !focusSubmitInProgress) {
+    if (DEV_MODE) {
+        const meta = getVideoMeta();
+        updateDevModeJson(
+            meta
+                ? buildPayload({ videoUrl: VIDEO_URL, frameIndex, videoMeta: meta, placed: labeler.placed })
+                : null
+        );
+    }
+    if (!DEV_MODE && focusModeActive && added && labeler.placed.has(focusNodeId) && !focusSubmitInProgress) {
         focusSubmitInProgress = true;
         doFocusSubmit().finally(() => {
             focusSubmitInProgress = false;
@@ -265,9 +276,10 @@ async function initDemoFrames() {
 }
 
 function setControlsEnabled(enabled: boolean) {
-    newFrameBtn.disabled = !enabled;
+    // In dev-mode newFrameBtn and downloadBtn are permanently disabled.
+    if (!DEV_MODE) newFrameBtn.disabled = !enabled;
     resetBtn.disabled = !enabled;
-    downloadBtn.disabled = !enabled;
+    if (!DEV_MODE) downloadBtn.disabled = !enabled;
 }
 
 function setViewMode(mode: ViewMode) {
@@ -642,6 +654,10 @@ initAuthControl();
     if (isSignedIn()) {
         newFrameBtn.hidden = false;
         downloadBtn.hidden = false;
+        if (DEV_MODE) {
+            newFrameBtn.disabled = true;
+            downloadBtn.disabled = true;
+        }
     }
     try {
         await ensureVideoModel();

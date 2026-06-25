@@ -75,12 +75,11 @@ test.describe("Pozu labeling page", () => {
         // `box` is its own page, so it's a link rather than a data-view-mode button.
         await expect(page.locator('a.top-nav-link[href*="box.html"]')).toBeVisible();
 
-        await page.locator('[data-view-mode="binary"]').click();
-        await expect(page.locator("#comingSoonView")).toBeVisible();
-        await expect(page.locator("#comingSoonModeName")).toContainText("Binary");
-        await expect(page.locator("#comingSoonView")).toContainText("Coming soon…");
+        // Binary and track are permanently disabled (curate features not yet available).
+        await expect(page.locator('[data-view-mode="binary"]')).toBeDisabled();
+        await expect(page.locator('[data-view-mode="track"]')).toBeDisabled();
 
-        await page.locator('[data-view-mode="label"]').click();
+        // Label mode is the default active view.
         await expect(page.locator("#labelView")).toBeVisible();
         await expect(page.locator("#comingSoonView")).toBeHidden();
     });
