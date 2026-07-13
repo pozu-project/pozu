@@ -8,7 +8,7 @@
   `<RequirePermission>` guard and a permission-gated sidebar nav for future pages. Ships with a
   Users page (paginated, sortable table with a roles editor) and a read-only Roles page, both
   reachable under `/admin` via `react-router-dom`
-  ([#85](https://github.com/pozu-project/pozu/pull/85)).
+  ([#86](https://github.com/pozu-project/pozu/pull/86)).
 - Reserved the fit-to-window frame area before the video loads so the page no longer flickers on
   arrival: the loading placeholder (and sidebar) are now sized to the same box the first frame will
   occupy, derived from the default 960×540 dimensions, instead of a small fixed 720×360 placeholder
