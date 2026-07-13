@@ -3,6 +3,7 @@ import {
     authHeader,
     captureTokenFromHash,
     clearToken,
+    getClaims,
     getToken,
     getUser,
     isSignedIn,
@@ -84,6 +85,36 @@ describe("getUser", () => {
             name: "The Octocat",
             avatar_url: "https://example.com/a.png",
         });
+    });
+});
+
+describe("getClaims", () => {
+    it("exposes roles/permissions claims for a valid token", () => {
+        const token = makeToken({
+            sub: "42",
+            login: "octocat",
+            roles: ["admin"],
+            permissions: ["users:read"],
+            exp: nowSeconds() + 3600,
+        });
+        localStorage.setItem("pozu.auth.token", token);
+
+        expect(getClaims()).toMatchObject({
+            sub: "42",
+            login: "octocat",
+            roles: ["admin"],
+            permissions: ["users:read"],
+        });
+    });
+
+    it("returns null when there is no token", () => {
+        expect(getClaims()).toBeNull();
+    });
+
+    it("returns null for a malformed token", () => {
+        localStorage.setItem("pozu.auth.token", "not-a-jwt");
+
+        expect(getClaims()).toBeNull();
     });
 });
 

@@ -1,0 +1,117 @@
+.admin-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-nav {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color, #ddd);
+    padding: 1rem;
+}
+
+.admin-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-nav a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.admin-nav a.active {
+    background: rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+.admin-gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 1rem;
+    text-align: center;
+}
+
+.admin-gate-link {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    background: #111;
+    color: #fff;
+    text-decoration: none;
+}
+
+.admin-no-access {
+    padding: 1rem;
+    border: 1px solid #e0a;
+    border-radius: 6px;
+}
+
+.admin-no-access-detail {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.admin-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.admin-role-editor {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.admin-role-editor-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-role-editor-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.admin-error {
+    color: #c00;
+}

@@ -16,7 +16,7 @@
  * drop tokens that have already expired.
  */
 
-const BACKEND_BASE = "https://pozu-codycbakerphd.pythonanywhere.com";
+export const BACKEND_BASE = "https://pozu-codycbakerphd.pythonanywhere.com";
 
 /** Backend endpoint that kicks off the GitHub OAuth flow. */
 export const LOGIN_URL = `${BACKEND_BASE}/auth/github/login`;
@@ -92,6 +92,29 @@ export function getUser(): AuthUser | null {
     return token ? decodeJwt(token) : null;
 }
 
+/**
+ * Admin-facing JWT claims. `roles`/`permissions` here are stale UI hints
+ * only — the backend `/api/v1/admin/me` response is the source of truth
+ * for gating and must be re-checked on load.
+ */
+export interface AuthClaims {
+    sub: string;
+    login?: string;
+    roles?: string[];
+    permissions?: string[];
+}
+
+/**
+ * Decode the current token's payload for the admin SPA, or null when
+ * there is no (valid, unexpired) token. Base64url-decoded by hand — no
+ * JWT library, and the signature is never verified client-side.
+ */
+export function getClaims(): AuthClaims | null {
+    const token = getToken();
+    if (!token) return null;
+    return decodeJwt(token) as AuthClaims | null;
+}
+
 export function isSignedIn(): boolean {
     return getToken() !== null;
 }
@@ -114,7 +137,9 @@ export function onAuthChange(cb: () => void): void {
  */
 function syncNavAuth(): void {
     const signedIn = isSignedIn();
-    for (const btn of document.querySelectorAll<HTMLButtonElement>(".top-nav-link[data-view-mode]")) {
+    for (const btn of document.querySelectorAll<HTMLButtonElement>(
+        ".top-nav-link[data-view-mode]"
+    )) {
         if (btn.hasAttribute("data-always-disabled")) continue;
         btn.disabled = !signedIn;
     }

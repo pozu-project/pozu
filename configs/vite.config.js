@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { createRequire } from "node:module";
@@ -16,6 +17,7 @@ export default defineConfig({
     define: {
         __APP_VERSION__: JSON.stringify(displayVersion),
     },
+    plugins: [react()],
     root: "src",
     base: "./",
     publicDir: false,
@@ -29,6 +31,7 @@ export default defineConfig({
                 label: resolve(__dirname, "../src/label/index.html"),
                 focus: resolve(__dirname, "../src/focus/index.html"),
                 box: resolve(__dirname, "../src/box/index.html"),
+                admin: resolve(__dirname, "../src/admin.html"),
             },
         },
     },

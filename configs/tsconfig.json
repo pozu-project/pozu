@@ -10,9 +10,16 @@
         "isolatedModules": true,
         "esModuleInterop": true,
         "allowImportingTsExtensions": true,
+        "jsx": "react-jsx",
         "types": ["node"],
         "typeRoots": ["../node_modules/@types"]
     },
-    "include": ["../src/**/*.ts", "../tests/**/*.ts", "../configs/**/*.ts"],
+    "include": [
+        "../src/**/*.ts",
+        "../src/**/*.tsx",
+        "../tests/**/*.ts",
+        "../tests/**/*.tsx",
+        "../configs/**/*.ts"
+    ],
     "exclude": ["../node_modules", "../dist"]
 }
