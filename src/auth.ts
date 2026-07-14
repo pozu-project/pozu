@@ -16,7 +16,7 @@
  * drop tokens that have already expired.
  */
 
-const BACKEND_BASE = "https://pozu-codycbakerphd.pythonanywhere.com";
+export const BACKEND_BASE = "https://pozu-codycbakerphd.pythonanywhere.com";
 
 /** Backend endpoint that kicks off the GitHub OAuth flow. */
 export const LOGIN_URL = `${BACKEND_BASE}/auth/github/login`;

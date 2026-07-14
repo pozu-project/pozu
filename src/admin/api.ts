@@ -5,9 +5,9 @@
  * authorization decisions are always the backend's.
  */
 
-import { authHeader } from "../auth.js";
+import { authHeader, BACKEND_BASE, clearToken, notifyAuthChange } from "../auth.js";
 
-export const ADMIN_API_BASE = "https://pozu-codycbakerphd.pythonanywhere.com/api/v1/admin";
+export const ADMIN_API_BASE = `${BACKEND_BASE}/api/v1/admin`;
 
 /** Authoritative identity + permissions, from `GET /api/v1/admin/me`. */
 export interface AdminMe {
@@ -75,7 +75,11 @@ async function request<T>(path: string, init: RequestInit, fetchImpl: typeof fet
         },
     });
 
-    if (response.status === 401) throw new UnauthorizedError();
+    if (response.status === 401) {
+        clearToken();
+        notifyAuthChange();
+        throw new UnauthorizedError();
+    }
 
     if (!response.ok) {
         const detail = (await response.text()).trim();

@@ -48,12 +48,13 @@ describe("fetchMe", () => {
         });
     });
 
-    it("throws UnauthorizedError on 401", async () => {
+    it("throws UnauthorizedError and clears the dead token on 401", async () => {
         const fetchMock = vi.fn(async () => new Response("", { status: 401 }));
 
         await expect(fetchMe(fetchMock as unknown as typeof fetch)).rejects.toBeInstanceOf(
             UnauthorizedError
         );
+        expect(localStorage.getItem("pozu.auth.token")).toBeNull();
     });
 });
 
