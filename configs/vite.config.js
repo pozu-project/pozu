@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { createRequire } from "node:module";
@@ -13,6 +14,9 @@ const displayVersion = process.env.POZU_DISPLAY_VERSION ?? version;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+    // Only the admin SPA (src/admin/) uses React; the plugin is a no-op for
+    // the vanilla .ts entry points.
+    plugins: [react()],
     define: {
         __APP_VERSION__: JSON.stringify(displayVersion),
     },
@@ -29,6 +33,7 @@ export default defineConfig({
                 label: resolve(__dirname, "../src/label/index.html"),
                 focus: resolve(__dirname, "../src/focus/index.html"),
                 box: resolve(__dirname, "../src/box/index.html"),
+                admin: resolve(__dirname, "../src/admin.html"),
             },
         },
     },

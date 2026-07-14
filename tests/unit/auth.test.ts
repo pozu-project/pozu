@@ -3,6 +3,7 @@ import {
     authHeader,
     captureTokenFromHash,
     clearToken,
+    getClaims,
     getToken,
     getUser,
     isSignedIn,
@@ -84,6 +85,50 @@ describe("getUser", () => {
             name: "The Octocat",
             avatar_url: "https://example.com/a.png",
         });
+    });
+});
+
+describe("getClaims", () => {
+    it("exposes the decoded payload including role/permission hints", () => {
+        const token = makeToken({
+            sub: "42",
+            login: "octocat",
+            roles: ["curator"],
+            permissions: ["users:read", "roles:read"],
+            exp: nowSeconds() + 3600,
+        });
+        localStorage.setItem("pozu.auth.token", token);
+
+        expect(getClaims()).toEqual({
+            sub: "42",
+            login: "octocat",
+            roles: ["curator"],
+            permissions: ["users:read", "roles:read"],
+        });
+    });
+
+    it("leaves roles/permissions undefined when the JWT lacks them", () => {
+        const token = makeToken({ sub: "42", login: "octocat", exp: nowSeconds() + 3600 });
+        localStorage.setItem("pozu.auth.token", token);
+
+        expect(getClaims()).toEqual({
+            sub: "42",
+            login: "octocat",
+            roles: undefined,
+            permissions: undefined,
+        });
+    });
+
+    it("returns null when signed out", () => {
+        expect(getClaims()).toBeNull();
+    });
+
+    it("returns null for a malformed token", () => {
+        localStorage.setItem("pozu.auth.token", "not-a-jwt");
+        expect(getClaims()).toBeNull();
+
+        localStorage.setItem("pozu.auth.token", "still.not$json.ajwt");
+        expect(getClaims()).toBeNull();
     });
 });
 
