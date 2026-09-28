@@ -16,7 +16,7 @@
  * drop tokens that have already expired.
  */
 
-const BACKEND_BASE = "https://pozu-codycbakerphd.pythonanywhere.com";
+export const BACKEND_BASE = "https://pozu-codycbakerphd.pythonanywhere.com";
 
 /** Backend endpoint that kicks off the GitHub OAuth flow. */
 export const LOGIN_URL = `${BACKEND_BASE}/auth/github/login`;
@@ -92,6 +92,38 @@ export function getUser(): AuthUser | null {
     return token ? decodeJwt(token) : null;
 }
 
+export interface AuthClaims {
+    /** GitHub numeric user id (JWT `sub`). */
+    sub: string;
+    login?: string;
+    /**
+     * Role / permission claims baked into the JWT at sign-in time. These
+     * are stale UI hints only — authoritative permissions must be fetched
+     * from `GET /api/v1/admin/me` and re-checked by the backend on every
+     * admin API call.
+     */
+    roles?: string[];
+    permissions?: string[];
+}
+
+/**
+ * Full decoded JWT payload (still unverified — display/hinting only), or
+ * null when there is no token or the stored token is not a well-formed
+ * three-part JWT with a JSON payload.
+ */
+export function getClaims(): AuthClaims | null {
+    const token = getToken();
+    if (!token) return null;
+    const payload = decodeJwt(token) as (AuthUser & AuthClaims) | null;
+    if (!payload || typeof payload.sub !== "string") return null;
+    return {
+        sub: payload.sub,
+        login: payload.login,
+        roles: payload.roles,
+        permissions: payload.permissions,
+    };
+}
+
 export function isSignedIn(): boolean {
     return getToken() !== null;
 }
@@ -114,7 +146,9 @@ export function onAuthChange(cb: () => void): void {
  */
 function syncNavAuth(): void {
     const signedIn = isSignedIn();
-    for (const btn of document.querySelectorAll<HTMLButtonElement>(".top-nav-link[data-view-mode]")) {
+    for (const btn of document.querySelectorAll<HTMLButtonElement>(
+        ".top-nav-link[data-view-mode]"
+    )) {
         if (btn.hasAttribute("data-always-disabled")) continue;
         btn.disabled = !signedIn;
     }

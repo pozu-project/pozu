@@ -1,5 +1,13 @@
 # Upcoming
 
+- Added a React admin SPA as a new self-contained `admin.html` entry point, leaving the vanilla
+  labeler pages untouched. It ships permission primitives meant to be reused by every future admin
+  page — a `usePermissions()` context fed by the authoritative `GET /api/v1/admin/me` (JWT
+  role/permission claims, exposed via a new `getClaims()` helper in `auth.ts`, are treated as stale
+  hints only), a `<RequirePermission>` gate, and a sidebar that hides pages the user cannot open —
+  plus the first two pages: a sortable, paginated Users table with a role-assignment editor (gated
+  by `users:read` / `roles:write`) and a read-only Roles listing (gated by `roles:read`)
+  ([#87](https://github.com/pozu-project/pozu/pull/87)).
 - Reserved the fit-to-window frame area before the video loads so the page no longer flickers on
   arrival: the loading placeholder (and sidebar) are now sized to the same box the first frame will
   occupy, derived from the default 960×540 dimensions, instead of a small fixed 720×360 placeholder
